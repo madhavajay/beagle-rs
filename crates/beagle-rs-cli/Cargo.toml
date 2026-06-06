@@ -1,0 +1,14 @@
+[package]
+name = "beagle-rs-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Command-line front-end for beagle-rs (drop-in replacement for beagle.jar)"
+
+[[bin]]
+name = "beagle-rs"
+path = "src/main.rs"
+
+[dependencies]
+beagle-rs = { workspace = true }

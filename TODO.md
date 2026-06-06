@@ -187,17 +187,27 @@ The Java source ships **no tests** (confirmed: 0 `*Test*` files, no JUnit). Buil
       are the *only* permitted normalization, and each normalized field must be explicitly enumerated
       and justified — nothing else gets a pass.
 
-## Phase 5 — Rust workspace scaffolding
-- [ ] `cargo` workspace: `crates/beagle-rs` (lib) + `crates/beagle-rs-cli` (bin).
-- [ ] Pick deps: `clap` (args), `flate2`/custom BGZIP, `thiserror`/`anyhow`, `rayon` (threads, later),
-      `rstest`/`proptest`/`pretty_assertions` (tests). Add `cargo llvm-cov` coverage gate.
-- [ ] CI (`.github/workflows`): Rust gate (`fmt`, `clippy -D warnings`, `test`, coverage) + parity gate
-      (build Java reference, run differential suite). Both required.
+## Phase 5 — Rust workspace scaffolding  ✅ DONE (2026-06-06)
+- [x] `cargo` workspace: `crates/beagle-rs` (lib) + `crates/beagle-rs-cli` (bin, placeholder CLI).
+- [x] CI (`.github/workflows/ci.yml`): **rust** gate (`fmt --check`, `clippy -D warnings`, `test`) +
+      **java-parity** gate (rebuild Java reference from the submodule, regenerate the parity fixtures,
+      fail on drift). Both required.
+- [ ] Deps added per-package as needed (e.g. zlib-backed `flate2` for `blbutil` BGZIP); `cargo llvm-cov`
+      coverage gate to be added once there is more surface to measure.
+
+### Per-package parity harness pattern (established with `ints`)
+For each pure-logic package: a Java driver under `tools/java/` emits a deterministic transcript from the
+original classes (`scripts/gen-*-parity.sh` → `fixtures/<pkg>/parity.txt`); a Rust integration test
+reproduces it via `include_str!` and asserts byte-for-byte equality. The `ints` transcript includes the
+**byte-exact `PackedIntArray` backing words** and the **internal `IntIntMap` key/value order**, so it
+verifies representation, not just observable outputs.
 
 ## Phase 6 — Port module-by-module (bottom-up)
 Port order follows the dependency graph; copy the matching Java tests into Rust first, then implement
 until they pass, then add the parity check. File counts in parens.
-- [ ] `ints` (9) — `IntArray/IntList/PackedIntArray/...` integer-packed structures. Watch bit-packing/endianness.
+- [x] `ints` (9) ✅ — `IntArray` trait + `IntList`, `SynchedIntList`, `PackedIntArray`, `UnsignedByteArray`,
+      `CharArray`, `WrappedIntArray`, `IndexArray`, `IntIntMap` + factories/statics. 32 unit tests +
+      cross-language parity (byte-exact packing + map ordering). 7 quirks preserved (see `docs/known-quirks.md`).
 - [ ] `blbutil` (22) — base utils: `BitArray`, `FloatArray/DoubleArray`, `StringUtil`, `Validate`,
       file IO, **BGZIP** (`BGZipIt`, `BGZIPOutputStream`), `MultiThreadUtils`.
 - [ ] `beagleutil` (8) — `ChromIds`, `SampleIds`, `ThreadSafeIndexer`, PBWT updaters (`PbwtUpdater`,

@@ -1,0 +1,15 @@
+[package]
+name = "beagle-rs"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description.workspace = true
+
+[lib]
+name = "beagle_rs"
+path = "src/lib.rs"
+
+[dependencies]
+
+[dev-dependencies]

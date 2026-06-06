@@ -1,0 +1,19 @@
+[workspace]
+resolver = "2"
+members = ["crates/beagle-rs", "crates/beagle-rs-cli"]
+
+[workspace.package]
+version = "0.0.0"
+edition = "2021"
+license = "GPL-3.0-or-later"
+repository = "https://github.com/madhavajay/beagle-rs"
+description = "A Rust port of Beagle 5.5 (27Feb25.75f) — genotype phasing and imputation"
+
+[workspace.dependencies]
+beagle-rs = { path = "crates/beagle-rs" }
+# Added per package as the port reaches them, e.g. for byte-exact BGZIP in `blbutil`:
+# flate2 = { version = "1", features = ["zlib"], default-features = false }
+
+[workspace.lints.clippy]
+# The port mirrors Java arithmetic/bit-twiddling closely; a few lints fight that.
+# Keep the default deny posture in CI (-D warnings) but allow the unavoidable ones here.
