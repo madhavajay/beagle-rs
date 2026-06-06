@@ -36,3 +36,4 @@ Default stance: **preserve** (byte-for-byte parity is the goal).
 |----|----------|----------|----------|
 | vcf-1 | `AlleleRefGTRec.deepCopy(int[][])` | Builds `copy` but `return ia` (the input), so it is a shallow share, not a deep copy. No observable effect because the record is immutable. The Rust port clones (equivalent for immutable data). | preserve-effect |
 | vcf-2 | `LowMafGTRec.alleleCount(majorAllele)` | Subtracts `hapIndices.length` (the allele *count*) once per non-major allele instead of that row's length (`hapIndices[al].length`), so the returned major-allele count is generally wrong. Preserved. | preserve |
+| vcf-3 | `PlinkGenMap.closestIndex` | The out-of-range branch tests `insPt == basePos.length` (the chromosome-count / outer-array length) instead of `basePos[chrom].length`, so the right-edge clamp is keyed off the wrong bound. Preserved. | preserve |

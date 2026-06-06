@@ -2,7 +2,25 @@
 //! `geneticMap(file, chromInt)` factory is completed once `PlinkGenMap` is ported; the
 //! `PositionMap` default (coordinate × scale) is available now.
 
-use super::{Marker, Markers};
+use crate::beagleutil::ChromInterval;
+use std::path::Path;
+
+use super::{Marker, Markers, PlinkGenMap, PositionMap};
+
+/// `GeneticMap.geneticMap(File, ChromInterval)` — `PositionMap` (1cM=1Mb) if no file,
+/// else a `PlinkGenMap` (optionally restricted to `chromInt`'s chromosome).
+pub fn genetic_map_from_file(
+    file: Option<&Path>,
+    chrom_int: Option<&ChromInterval>,
+) -> Box<dyn GeneticMap> {
+    match file {
+        None => Box::new(PositionMap::new(1e-6)),
+        Some(f) => match chrom_int {
+            None => Box::new(PlinkGenMap::from_plink_map_file(f)),
+            Some(ci) => Box::new(PlinkGenMap::from_plink_map_file_chrom(f, &ci.chrom())),
+        },
+    }
+}
 
 /// Port of the `vcf/GeneticMap.java` interface.
 pub trait GeneticMap {

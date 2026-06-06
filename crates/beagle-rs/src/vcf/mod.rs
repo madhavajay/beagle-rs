@@ -18,6 +18,7 @@ mod marker;
 mod marker_parser;
 pub mod marker_utils;
 mod markers;
+mod plink_gen_map;
 mod position_map;
 mod ref_gt_rec;
 mod samples;
@@ -30,7 +31,9 @@ mod vcf_rec_gt_parser;
 pub use allele_ref_gt_rec::AlleleRefGTRec;
 pub use basic_gt_rec::BasicGTRec;
 pub use bit_array_ref_gt_rec::BitArrayRefGTRec;
-pub use genetic_map::{gen_pos_markers, gen_pos_markers_min_dist, GeneticMap};
+pub use genetic_map::{
+    gen_pos_markers, gen_pos_markers_min_dist, genetic_map_from_file, GeneticMap,
+};
 pub use gt::GT;
 pub use gt_rec::{allele_counts, allele_freq, to_vcf_rec, GTRec};
 pub use hap_ref_gt_rec::HapRefGTRec;
@@ -40,6 +43,7 @@ pub use low_maf_gt_rec::LowMafGTRec;
 pub use marker::Marker;
 pub use marker_parser::MarkerParser;
 pub use markers::Markers;
+pub use plink_gen_map::PlinkGenMap;
 pub use position_map::PositionMap;
 pub use ref_gt_rec::{allele_ref_gt_rec_from_components, allele_ref_gt_rec_from_rec, RefGTRec};
 pub use samples::Samples;
