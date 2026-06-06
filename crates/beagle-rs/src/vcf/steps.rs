@@ -6,6 +6,7 @@ use std::rc::Rc;
 use super::MarkerMap;
 
 /// Port of `vcf/Steps.java`.
+#[derive(Clone)]
 pub struct Steps {
     map: Rc<MarkerMap>,
     step_ends: Vec<i32>,

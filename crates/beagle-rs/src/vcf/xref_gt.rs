@@ -13,6 +13,7 @@ use std::rc::Rc;
 use super::{Marker, Markers, RestrictedGT, Samples, GT};
 
 /// Port of `vcf/XRefGT.java`.
+#[derive(Clone)]
 pub struct XRefGT {
     samples: Samples,
     markers: Markers,
