@@ -226,8 +226,10 @@ until they pass, then add the parity check. File counts in parens.
       sliding windows, `PlinkGenMap`, `MarkerMap`. Largest IO surface; many record encodings.
 - [ ] `bref` (10) — bref3 binary format read/write (`Bref3*`, `SeqCoder3`, `AsIs/CompressBref3Writer`,
       `UnBref3`). **Byte-exact** target.
-- [ ] `main` (5) — `Par` (CLI arg parsing — define the full arg surface), `Main`, `Pedigree`,
-      `RunStats`, `WindowWriter`. Match arg names/defaults exactly.
+- [~] `main` (5) — `Par` ✅ + `Pedigree` ✅ done; `RunStats`, `WindowWriter`, `Main` remain
+      (the top-level driver wiring phase + imp + IO; needs the deferred `blbutil` writer
+      helpers — `FileUtil.bgzipPrintWriter`/`stdOutPrintWriter`, `MultiThreadUtils` — and
+      `Utilities.duoPrint`/`timeStamp`/`commandLine`/`elapsedNanos`). Match arg names/defaults.
 - [x] `phase` (30) ✅ — phasing engine fully ported: PBWT/IBS (`Pbwt*Phaser`, `Ibs2*`,
       `Low*PhaseIbs`), HMM states (`Basic/LowFreqPhaseStates`), forward-backward HMM
       (`PhaseBaum2`, `HmmUpdater`, `HmmStateProbs`, `HmmParamData`), Li-Stephens driver
@@ -235,8 +237,10 @@ until they pass, then add the parity check. File counts in parens.
       `EstPhase`, `CodedSteps`, `PhaseData`, `FixedPhaseData`. Added `jdk::PriorityQueue`
       (Java-exact heap, tie-breaking verified) for composite-hap construction. 234 unit tests.
       Quirk: `EstPhase.get()` clones (Java shares one object) — see docs/known-quirks.md.
-- [ ] `imp` (12) — imputation engine: `ImpData`, `ImpIbs`, `ImpLS`/`ImpLSBaum`, `HaplotypeCoder`,
-      `ImputedRecBuilder`, `ImputedVcfWriter`, `StateProbs`. Core algorithm; FP-sensitive.
+- [x] `imp` (12) ✅ — imputation engine fully ported: `StateProbs`/`StateProbsFactory`,
+      `HaplotypeCoder`, `RefHapHash`, `ImpData`, `CodedSteps`, `ImpIbs`, `ImpStates`,
+      `ImpLSBaum`, `ImpLS`, `ImputedRecBuilder`, `ImputedVcfWriter`. Byte-exact DS/R2/AF
+      formatting (DecimalFormat tables generated from Java 26; AF via `{:.4}`). 251 unit tests.
 
 ## Phase 7 — End-to-end parity & integration
 - [ ] Full-pipeline parity on every fixture (official + pypgx CYP4F2): phasing, VCF-ref imputation,
