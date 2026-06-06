@@ -83,6 +83,13 @@ impl RefGT {
     pub fn get(&self, marker: i32) -> Rc<dyn RefGTRec> {
         self.recs[marker as usize].clone()
     }
+
+    /// `restrict(Markers, int[])` returning the concrete `RefGT` (the inherent form of the
+    /// `GT::restrict` override).
+    pub fn restrict_to_ref(&self, markers: &Markers, indices: &[i32]) -> RefGT {
+        let rra = select_strictly_increasing(&self.recs, indices);
+        RefGT::new(markers.clone(), self.samples.clone(), rra)
+    }
 }
 
 fn select_strictly_increasing(recs: &[Rc<dyn RefGTRec>], indices: &[i32]) -> Vec<Rc<dyn RefGTRec>> {
@@ -132,8 +139,7 @@ impl GT for RefGT {
     }
 
     fn restrict(self: Rc<Self>, markers: &Markers, indices: &[i32]) -> Rc<dyn GT> {
-        let rra = select_strictly_increasing(&self.recs, indices);
-        Rc::new(RefGT::new(markers.clone(), self.samples.clone(), rra))
+        Rc::new(self.restrict_to_ref(markers, indices))
     }
 
     fn restrict_range(self: Rc<Self>, start: i32, end: i32) -> Rc<dyn GT> {

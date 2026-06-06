@@ -396,6 +396,7 @@ impl IntArray for CharArray {
 // =================================================================================
 
 /// Port of `ints/WrappedIntArray.java`: an immutable `int[]` (no packing).
+#[derive(Clone, Debug)]
 pub struct WrappedIntArray {
     ia: Vec<i32>,
 }
