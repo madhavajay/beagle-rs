@@ -70,6 +70,19 @@ pub fn allele_ref_gt_rec_from_components(
     }
 }
 
+/// `RefGTRec.alleleRefGTRec(VcfRecGTParser)` — parses a VCF record's GT field into an
+/// allele-coded record (biallelic → `TwoAlleleRefGTRec`, else `AlleleRefGTRec`).
+pub fn allele_ref_gt_rec_from_parser(gtp: &super::VcfRecGTParser) -> Box<dyn RefGTRec> {
+    let marker = gtp.marker().clone();
+    let samples = gtp.samples().clone();
+    let non_maj = gtp.non_maj_ref_indices();
+    if gtp.n_alleles() == 2 {
+        Box::new(TwoAlleleRefGTRec::from_components(marker, samples, non_maj))
+    } else {
+        Box::new(AlleleRefGTRec::from_components(marker, samples, non_maj))
+    }
+}
+
 /// `RefGTRec.alleleRefGTRec(RefGTRec)` — returns an allele-coded record. (Unlike Java,
 /// this always reconstructs rather than returning an already-allele-coded `rec` as-is;
 /// the result is identical for the immutable record.)

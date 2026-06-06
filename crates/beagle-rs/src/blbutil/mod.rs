@@ -5,6 +5,7 @@
 
 mod bgzip;
 mod bit_array;
+mod block_line_reader;
 mod filter;
 mod float_arrays;
 mod input_it;
@@ -14,6 +15,7 @@ mod utilities;
 
 pub use bgzip::{write_empty_block, BgzipOutputStream, MAX_INPUT_BYTES};
 pub use bit_array::BitArray;
+pub use block_line_reader::BlockLineReader;
 pub use filter::Filter;
 pub use float_arrays::{DoubleArray, FloatArray, FloatList};
 pub use input_it::{FileIt, InputIt};

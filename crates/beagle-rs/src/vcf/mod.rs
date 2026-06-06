@@ -28,6 +28,7 @@ mod plink_gen_map;
 mod position_map;
 mod ref_gt;
 mod ref_gt_rec;
+mod ref_it;
 mod restricted_gt;
 mod samples;
 mod spliced_gt;
@@ -69,7 +70,11 @@ pub use markers::Markers;
 pub use plink_gen_map::PlinkGenMap;
 pub use position_map::PositionMap;
 pub use ref_gt::RefGT;
-pub use ref_gt_rec::{allele_ref_gt_rec_from_components, allele_ref_gt_rec_from_rec, RefGTRec};
+pub use ref_gt_rec::{
+    allele_ref_gt_rec_from_components, allele_ref_gt_rec_from_parser, allele_ref_gt_rec_from_rec,
+    RefGTRec,
+};
+pub use ref_it::RefIt;
 pub use restricted_gt::RestrictedGT;
 pub use samples::Samples;
 pub use spliced_gt::SplicedGT;

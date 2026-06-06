@@ -60,7 +60,7 @@ pub struct VcfIt<I: FileIt<Item = String>> {
 }
 
 /// `VcfIt.head(src, it)` — the leading `#` lines plus the first data line.
-fn head<I: Iterator<Item = String>>(src: &str, it: &mut I) -> Vec<String> {
+pub(crate) fn head<I: Iterator<Item = String>>(src: &str, it: &mut I) -> Vec<String> {
     let mut lines: Vec<String> = Vec::with_capacity(32);
     let mut line = it.next();
     while let Some(l) = line {
