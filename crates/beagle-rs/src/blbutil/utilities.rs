@@ -78,13 +78,27 @@ impl Utilities {
         sb
     }
 
+    /// Seconds since the Unix epoch for wall-clock output fields (VCF `##filedate`, `.log`
+    /// start/end timestamps). Honors `SOURCE_DATE_EPOCH` (the reproducible-builds standard) when
+    /// it is set to a valid non-negative integer, so output can be made deterministic; otherwise
+    /// reads the system clock. This is a Rust-port convenience — Java always reads the clock —
+    /// and only affects fields already excluded from byte-for-byte comparison.
+    pub fn wall_clock_secs() -> u64 {
+        if let Ok(s) = std::env::var("SOURCE_DATE_EPOCH") {
+            if let Ok(epoch) = s.trim().parse::<u64>() {
+                return epoch;
+            }
+        }
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|d| d.as_secs())
+            .unwrap_or(0)
+    }
+
     /// `timeStamp()` — current UTC time as `hh:mm a 'UTC on' dd MMM yyyy` (wall-clock; a
     /// documented `.log` normalization field).
     pub fn time_stamp() -> String {
-        let secs = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .map(|d| d.as_secs())
-            .unwrap_or(0);
+        let secs = Self::wall_clock_secs();
         let days = (secs / 86400) as i64;
         let sod = (secs % 86400) as i64; // seconds of day (UTC)
         let hour24 = sod / 3600;

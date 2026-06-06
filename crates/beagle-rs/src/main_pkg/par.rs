@@ -220,38 +220,58 @@ impl Par {
     /// `usage()` — a description of the Beagle command-line arguments.
     pub fn usage() -> String {
         let nl = consts::NL;
-        format!(
-            "Usage: {cmd} [arguments]{nl}\
-{nl}\
-data parameters ...{nl}\
-  gt=<VCF file with GT FORMAT field>                 (required){nl}\
-  ref=<bref3 or VCF file with phased genotypes>      (optional){nl}\
-  out=<output file prefix>                           (required){nl}\
-  map=<PLINK map file with cM units>                 (optional){nl}\
-  chrom=<[chrom] or [chrom]:[start]-[end]>           (optional){nl}\
-  excludesamples=<file with 1 sample ID per line>    (optional){nl}\
-  excludemarkers=<file with 1 marker ID per line>    (optional){nl}{nl}\
-phasing parameters ...{nl}\
-  burnin=<max burnin iterations>                     (default={D_BURNIN}){nl}\
-  iterations=<phasing iterations>                    (default={D_ITERATIONS}){nl}\
-  phase-states=<model states for phasing>            (default={D_PHASE_STATES}){nl}{nl}\
-imputation parameters ...{nl}\
-  impute=<impute ungenotyped markers (true/false)>   (default={D_IMPUTE}){nl}\
-  imp-states=<model states for imputation>           (default={D_IMP_STATES}){nl}\
-  cluster=<max cM in a marker cluster>               (default={D_CLUSTER}){nl}\
-  ap=<print posterior allele probabilities>          (default={D_AP}){nl}\
-  gp=<print posterior genotype probabilities>        (default={D_GP}){nl}{nl}\
-general parameters ...{nl}\
-  ne=<effective population size>                     (default={D_NE}){nl}\
-  err=<allele mismatch probability>                  (default: data dependent){nl}\
-  em=<estimate ne and err parameters (true/false)>   (default={D_EM}){nl}\
-  window=<window length in cM>                       (default={D_WINDOW}){nl}\
-  window-markers=<maximum markers per window>        (default={D_WINDOW_MARKERS}){nl}\
-  overlap=<window overlap in cM>                     (default={D_OVERLAP}){nl}\
-  seed=<random seed>                                 (default={D_SEED}){nl}\
-  nthreads=<number of threads>                       (default: machine dependent){nl}{nl}",
-            cmd = super::COMMAND,
-        )
+        let cmd = super::COMMAND;
+        let window = java_float_str(D_WINDOW);
+        let overlap = java_float_str(D_OVERLAP);
+        let cluster = java_float_str(D_CLUSTER);
+        // Built as a line array joined by `nl` (a `\`-continuation in a single literal would eat
+        // the leading two-space indent of each argument line).
+        let lines: [String; 32] = [
+            format!("Usage: {cmd} [arguments]"),
+            String::new(),
+            "data parameters ...".to_string(),
+            "  gt=<VCF file with GT FORMAT field>                 (required)".to_string(),
+            "  ref=<bref3 or VCF file with phased genotypes>      (optional)".to_string(),
+            "  out=<output file prefix>                           (required)".to_string(),
+            "  map=<PLINK map file with cM units>                 (optional)".to_string(),
+            "  chrom=<[chrom] or [chrom]:[start]-[end]>           (optional)".to_string(),
+            "  excludesamples=<file with 1 sample ID per line>    (optional)".to_string(),
+            "  excludemarkers=<file with 1 marker ID per line>    (optional)".to_string(),
+            String::new(),
+            "phasing parameters ...".to_string(),
+            format!("  burnin=<max burnin iterations>                     (default={D_BURNIN})"),
+            format!(
+                "  iterations=<phasing iterations>                    (default={D_ITERATIONS})"
+            ),
+            format!(
+                "  phase-states=<model states for phasing>            (default={D_PHASE_STATES})"
+            ),
+            String::new(),
+            "imputation parameters ...".to_string(),
+            format!("  impute=<impute ungenotyped markers (true/false)>   (default={D_IMPUTE})"),
+            format!(
+                "  imp-states=<model states for imputation>           (default={D_IMP_STATES})"
+            ),
+            format!("  cluster=<max cM in a marker cluster>               (default={cluster})"),
+            format!("  ap=<print posterior allele probabilities>          (default={D_AP})"),
+            format!("  gp=<print posterior genotype probabilities>        (default={D_GP})"),
+            String::new(),
+            "general parameters ...".to_string(),
+            format!("  ne=<effective population size>                     (default={D_NE})"),
+            "  err=<allele mismatch probability>                  (default: data dependent)"
+                .to_string(),
+            format!("  em=<estimate ne and err parameters (true/false)>   (default={D_EM})"),
+            format!("  window=<window length in cM>                       (default={window})"),
+            format!(
+                "  window-markers=<maximum markers per window>        (default={D_WINDOW_MARKERS})"
+            ),
+            format!("  overlap=<window overlap in cM>                     (default={overlap})"),
+            format!("  seed=<random seed>                                 (default={D_SEED})"),
+            "  nthreads=<number of threads>                       (default: machine dependent)"
+                .to_string(),
+        ];
+        // Java terminates the last line and adds a trailing blank line (`... + nl + nl`).
+        format!("{}{nl}{nl}", lines.join(nl))
     }
 
     // data parameters
@@ -409,6 +429,19 @@ fn available_processors() -> i32 {
         .unwrap_or(1)
 }
 
+/// `String.valueOf(float)` for the in-range decimal values used in `usage()`. Java's
+/// `Float.toString` always keeps a fractional digit (`40.0`, `2.0`), whereas Rust's `{}` drops a
+/// trailing `.0` for integer-valued floats; this re-adds it. (Only used for the usage defaults,
+/// which lie in `[1e-3, 1e7)`, so the shortest-decimal output of `{}` matches Java's digits.)
+fn java_float_str(f: f32) -> String {
+    let s = format!("{f}");
+    if s.contains(['.', 'e', 'E', 'N', 'n']) {
+        s
+    } else {
+        format!("{s}.0")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -421,6 +454,31 @@ mod tests {
             .write_all(b"x")
             .unwrap();
         path
+    }
+
+    #[test]
+    fn java_float_str_keeps_fractional_digit() {
+        assert_eq!(java_float_str(40.0), "40.0"); // Java: String.valueOf(40.0f)
+        assert_eq!(java_float_str(2.0), "2.0");
+        assert_eq!(java_float_str(0.005), "0.005");
+    }
+
+    #[test]
+    fn usage_matches_java_layout() {
+        let u = Par::usage();
+        // argument lines keep the leading two-space indent (regression: `\`-continuation ate it)
+        assert!(u.contains("\n  gt=<VCF file with GT FORMAT field>                 (required)\n"));
+        // float defaults are rendered Java-style (40.0 / 2.0, not 40 / 2)
+        assert!(
+            u.contains("(default=40.0)"),
+            "window default not Java-formatted"
+        );
+        assert!(
+            u.contains("(default=2.0)"),
+            "overlap default not Java-formatted"
+        );
+        assert!(u.starts_with("Usage: java -jar beagle.27Feb25.75f.jar [arguments]\n\n"));
+        assert!(u.ends_with("(default: machine dependent)\n\n"));
     }
 
     #[test]

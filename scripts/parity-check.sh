@@ -7,7 +7,10 @@
 # fixtures themselves have not drifted (and prints the normalized `.log` diff for the record).
 #
 # Determinism knobs (must match how the golden fixtures were generated): nthreads=1 seed=99999.
+# SOURCE_DATE_EPOCH pins the VCF ##filedate wall-clock field to the golden's date (2026-06-06 UTC)
+# so the comparison is byte-exact (incl. the BGZIP deflate stream) regardless of when this runs.
 set -euo pipefail
+export SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-1780747200}"  # 2026-06-06 12:00:00 UTC
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 FIX="$ROOT/fixtures/official"

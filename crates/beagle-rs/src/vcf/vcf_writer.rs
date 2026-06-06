@@ -10,7 +10,6 @@
 
 use crate::blbutil::consts;
 use std::io::{self, Write};
-use std::time::{SystemTime, UNIX_EPOCH};
 
 use super::{GTRec, Marker, Markers, Samples, VcfRecBuilder, GT};
 
@@ -110,12 +109,9 @@ fn writeln_str(out: &mut dyn Write, s: &str) -> io::Result<()> {
 }
 
 /// `now()` — current date as `yyyyMMdd`. See the parity note at the top of this module:
-/// this is the wall-clock exception and is computed in UTC.
+/// this is the wall-clock exception and is computed in UTC (honoring `SOURCE_DATE_EPOCH`).
 fn now() -> String {
-    let secs = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map(|d| d.as_secs())
-        .unwrap_or(0);
+    let secs = crate::blbutil::Utilities::wall_clock_secs();
     let days = (secs / 86400) as i64;
     let (y, m, d) = civil_from_days(days);
     format!("{y:04}{m:02}{d:02}")

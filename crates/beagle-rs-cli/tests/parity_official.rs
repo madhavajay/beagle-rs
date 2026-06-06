@@ -5,6 +5,11 @@
 //! the produced `*.vcf.gz` / `*.bref3` is byte-identical to the golden output the Java reference
 //! generated with `nthreads=1 seed=99999` (see `fixtures/official/MANIFEST.md`).
 //!
+//! The golden `.vcf.gz` embeds a wall-clock `##filedate` (the documented normalization field). To
+//! make the byte comparison date-independent *and still prove BGZIP-byte parity*, the runs set
+//! `SOURCE_DATE_EPOCH` to an instant on the golden's date (2026-06-06 UTC) so `##filedate` matches
+//! the committed golden exactly — then every byte, including the deflate stream, must be identical.
+//!
 //! Marked `#[ignore]` because the `gt=` phasing run takes ~16 s in a debug build (≈2 s in
 //! release). CI runs them explicitly in release:
 //!   `cargo test -p beagle-rs-cli --release --test parity_official -- --ignored`
@@ -12,6 +17,10 @@
 
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+
+/// An instant on 2026-06-06 UTC — the date baked into the committed golden `##filedate`. Passed
+/// via `SOURCE_DATE_EPOCH` so the wall-clock field matches and the comparison is byte-exact.
+const GOLDEN_SOURCE_DATE_EPOCH: &str = "1780747200"; // 2026-06-06 12:00:00 UTC
 
 fn fixtures_dir() -> Option<PathBuf> {
     let d = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/official");
@@ -44,6 +53,7 @@ fn assert_beagle_parity(tag: &str, scenario_args: &[&str], golden: &str) {
     let status = Command::new(env!("CARGO_BIN_EXE_beagle-rs"))
         .args(&args)
         .current_dir(&dir)
+        .env("SOURCE_DATE_EPOCH", GOLDEN_SOURCE_DATE_EPOCH)
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .status()
