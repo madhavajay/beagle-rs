@@ -208,8 +208,16 @@ until they pass, then add the parity check. File counts in parens.
 - [x] `ints` (9) ✅ — `IntArray` trait + `IntList`, `SynchedIntList`, `PackedIntArray`, `UnsignedByteArray`,
       `CharArray`, `WrappedIntArray`, `IndexArray`, `IntIntMap` + factories/statics. 32 unit tests +
       cross-language parity (byte-exact packing + map ordering). 7 quirks preserved (see `docs/known-quirks.md`).
-- [ ] `blbutil` (22) — base utils: `BitArray`, `FloatArray/DoubleArray`, `StringUtil`, `Validate`,
-      file IO, **BGZIP** (`BGZipIt`, `BGZIPOutputStream`), `MultiThreadUtils`.
+- [~] `blbutil` (22) — foundation done; remainder sequenced with consumers (not skipped):
+      - [x] `Const`, `FloatArray`, `DoubleArray`, `FloatList`, `BitArray`, `StringUtil`,
+            `BGZIPOutputStream` (byte-exact), `Filter`, `Utilities`, `FileIt`, `InputIt`
+            (+ `jdk::Random` — faithful `java.util.Random`, ported here as the determinism base).
+      - [x] subsumed: `BGZipIt`, `BlockLineReader` (parallel readers; identical line output via `InputIt`).
+      - [ ] `Validate` → port with `main/Par` (its arg-validation backend).
+      - [ ] `FileUtil` writer side (`bgzipPrintWriter` chain) + RAF/reader helpers → with `vcf`/`bref`.
+      - [ ] `SampleFileIt`, `VcfFileIt` → with `vcf` (reference `vcf::Samples`/`VcfHeader`).
+      - [ ] `MultiThreadUtils` → with `phase`/`imp` (threading; `nthreads=1` parity first).
+      - [ ] `TriFunction` → Rust closures at call sites.
 - [ ] `beagleutil` (8) — `ChromIds`, `SampleIds`, `ThreadSafeIndexer`, PBWT updaters (`PbwtUpdater`,
       `PbwtDivUpdater`), intervals.
 - [ ] `vcf` (38) — VCF/genotype model + IO: `GT`, `Marker(s)`, `VcfRec`, `VcfRecGTParser`, `RefGT*`,
