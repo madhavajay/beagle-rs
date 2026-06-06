@@ -1,11 +1,11 @@
 //! Port of `phase/SamplePhase.java` — an estimated haplotype pair for one sample, with the
 //! genotype-cluster structure (homozygous runs split at hets/missing/unphased markers).
-//!
-//! The static `toBitLists(EstPhase)` factory depends on `EstPhase` and is added with it.
 
 use crate::blbutil::{BitArray, DoubleArray};
 use crate::ints::{IntArray, IntList};
 use crate::vcf::Markers;
+
+use super::EstPhase;
 
 /// Port of `phase/SamplePhase.ClustType`. Discriminants match the Java enum ordinals (the
 /// values stored in the `clustType` byte array).
@@ -44,6 +44,7 @@ impl ClustType {
 }
 
 /// Port of `phase/SamplePhase.java`.
+#[derive(Clone)]
 pub struct SamplePhase {
     sample: i32,
     markers: Markers,
@@ -408,6 +409,46 @@ impl SamplePhase {
     /// `hap2()` — a copy of the second haplotype.
     pub fn hap2(&self) -> BitArray {
         self.hap2.clone()
+    }
+
+    /// `SamplePhase.toBitLists(EstPhase)` — converts the per-sample (column-major) phasings
+    /// into one `BitArray` per marker, packing every haplotype's allele bits in
+    /// haplotype-major order. Java partitions markers across threads and concatenates the
+    /// batches in index order; the sequential build over `[0, nMarkers)` is identical.
+    pub fn to_bit_lists(est_phase: &EstPhase) -> Vec<BitArray> {
+        let fpd = est_phase.fpd();
+        let n_samples = fpd.targ_gt().n_samples();
+        let n_haps = n_samples << 1;
+        let gt = fpd.stage1_targ_gt();
+        let markers = gt.markers().clone();
+        let n_markers = markers.size();
+        let bits_per_allele: Vec<i32> = (0..n_markers)
+            .map(|m| markers.marker(m).bits_per_allele())
+            .collect();
+        let mut bit_lists: Vec<BitArray> = (0..n_markers)
+            .map(|m| BitArray::new(n_haps * bits_per_allele[m as usize]))
+            .collect();
+        for s in 0..n_samples {
+            let samp_phase = est_phase.get(s);
+            let h1 = s << 1;
+            let h2 = h1 | 0b1;
+            let mut in_bit = markers.sum_hap_bits(0);
+            for m in 0..n_markers {
+                let n_bits = bits_per_allele[m as usize];
+                let start_out_bit1 = h1 * n_bits;
+                let start_out_bit2 = h2 * n_bits;
+                for i in 0..n_bits {
+                    if samp_phase.hap1.get(in_bit) {
+                        bit_lists[m as usize].set(start_out_bit1 + i);
+                    }
+                    if samp_phase.hap2.get(in_bit) {
+                        bit_lists[m as usize].set(start_out_bit2 + i);
+                    }
+                    in_bit += 1;
+                }
+            }
+        }
+        bit_lists
     }
 }
 

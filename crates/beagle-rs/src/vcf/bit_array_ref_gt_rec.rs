@@ -1,11 +1,9 @@
 //! Port of `vcf/BitArrayRefGTRec.java` — phased, non-missing genotypes for one marker,
 //! with haplotype alleles packed `bitsPerAllele` bits each (LSB first) into a `BitArray`.
-//!
-//! The `toBitArrayRefGTRecs(EstPhase)` factory depends on the `phase` package and is
-//! ported with it; the (marker, samples, BitArray) constructor is provided here.
 
 use crate::blbutil::BitArray;
 use crate::ints::IntArray;
+use crate::phase::{EstPhase, SamplePhase};
 
 use super::{to_vcf_rec, GTRec, Marker, Samples};
 
@@ -18,6 +16,25 @@ pub struct BitArrayRefGTRec {
 }
 
 impl BitArrayRefGTRec {
+    /// `BitArrayRefGTRec.toBitArrayRefGTRecs(EstPhase)` — converts the current per-sample
+    /// (column-major) phase estimates into one row-major `BitArrayRefGTRec` per marker.
+    /// Java builds the array in parallel; the order is preserved, so the Rust port builds it
+    /// sequentially.
+    pub fn to_bit_array_ref_gt_recs(est_phase: &EstPhase) -> Vec<BitArrayRefGTRec> {
+        let fpd = est_phase.fpd();
+        let gt = fpd.stage1_targ_gt();
+        let markers = gt.markers().clone();
+        let samples = gt.samples().clone();
+        let bit_lists = SamplePhase::to_bit_lists(est_phase);
+        bit_lists
+            .into_iter()
+            .enumerate()
+            .map(|(m, bits)| {
+                BitArrayRefGTRec::new(markers.marker(m as i32).clone(), samples.clone(), bits)
+            })
+            .collect()
+    }
+
     /// `new BitArrayRefGTRec(Marker, Samples, BitArray)`.
     pub fn new(marker: Marker, samples: Samples, alleles: BitArray) -> Self {
         BitArrayRefGTRec {

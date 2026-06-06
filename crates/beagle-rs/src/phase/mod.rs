@@ -1,6 +1,7 @@
 //! Port of the Java `phase` package — the haplotype phasing engine (PBWT-based IBS,
 //! HMM forward/backward, and parameter estimation). Ported bottom-up from leaf types.
 
+mod est_phase;
 mod fixed_phase_data;
 mod fwd_pbwt_phaser;
 mod hmm_updater;
@@ -15,6 +16,7 @@ mod sample_phase;
 mod sample_seg;
 mod swap_rate;
 
+pub use est_phase::EstPhase;
 pub use fixed_phase_data::FixedPhaseData;
 pub use fwd_pbwt_phaser::FwdPbwtPhaser;
 pub use hmm_updater::HmmUpdater;

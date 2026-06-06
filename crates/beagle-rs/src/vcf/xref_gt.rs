@@ -1,12 +1,12 @@
 //! Port of `vcf/XRefGT.java` — phased, non-missing genotypes stored in haplotype-major
 //! (column-major) order: one `BitArray` per haplotype packing every marker's allele bits.
 //!
-//! The `from(Samples, AtomicReferenceArray<SamplePhase>)` factory depends on the `phase`
-//! package and is added once `phase::SamplePhase` is ported. The parallelism in Java's
-//! `fromPhasedGT` only partitions work; the output array order is preserved, so the Rust
-//! port builds it sequentially (identical result) and ignores the thread count.
+//! The parallelism in Java's `from`/`fromPhasedGT` only partitions work; the output array
+//! order is preserved, so the Rust port builds it sequentially (identical result) and
+//! ignores the thread count.
 
 use crate::blbutil::{consts, BitArray};
+use crate::phase::SamplePhase;
 use std::fmt;
 use std::rc::Rc;
 
@@ -39,6 +39,32 @@ impl XRefGT {
         haps.extend(first.haps.iter().cloned());
         haps.extend(second.haps.iter().cloned());
         XRefGT::new_parts(first.markers.clone(), samples, haps)
+    }
+
+    /// `XRefGT.from(Samples, AtomicReferenceArray<SamplePhase>)` — builds haplotype-major
+    /// genotypes from per-sample phasings (`phase[s]` supplies sample `s`'s two haplotypes).
+    /// Java parallelizes over haplotypes, but the output order is preserved, so the Rust
+    /// port fills the array sequentially.
+    pub fn from(samples: &Samples, phase: &[SamplePhase]) -> XRefGT {
+        let n_samples = phase.len();
+        assert!(
+            n_samples != 0 && samples.size() as usize == n_samples,
+            "{n_samples}"
+        );
+        let markers = phase[0].markers().clone();
+        let n_haps = n_samples << 1;
+        let haps: Vec<BitArray> = (0..n_haps)
+            .map(|h| {
+                let samp_phase = &phase[h >> 1];
+                assert!(*samp_phase.markers() == markers, "inconsistent data");
+                if (h & 0b1) == 0 {
+                    samp_phase.hap1()
+                } else {
+                    samp_phase.hap2()
+                }
+            })
+            .collect();
+        XRefGT::new_parts(markers, samples.clone(), haps)
     }
 
     /// `XRefGT.fromPhasedGT(GT gt, int nThreads)`. `n_threads` does not affect output.
