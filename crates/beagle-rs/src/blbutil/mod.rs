@@ -5,13 +5,17 @@
 
 mod bgzip;
 mod bit_array;
+mod filter;
 mod float_arrays;
 mod string_util;
+mod utilities;
 
 pub use bgzip::{write_empty_block, BgzipOutputStream, MAX_INPUT_BYTES};
 pub use bit_array::BitArray;
+pub use filter::Filter;
 pub use float_arrays::{DoubleArray, FloatArray, FloatList};
 pub use string_util::StringUtil;
+pub use utilities::Utilities;
 
 /// Port of `blbutil/Const.java` — string/character/numeric constants. (Java field
 /// names are lower-case, e.g. `Const.tab`; here they follow Rust `SCREAMING_CASE`.)
