@@ -47,6 +47,11 @@ impl<W: Write> DataOut<W> {
         self.inner.write_all(&(v as u16).to_be_bytes())
     }
 
+    /// `writeChar(int)` — low 16 bits, big-endian (identical bytes to `writeShort`).
+    pub fn write_char(&mut self, v: i32) -> io::Result<()> {
+        self.inner.write_all(&(v as u16).to_be_bytes())
+    }
+
     /// `writeInt(int)` — big-endian.
     pub fn write_int(&mut self, v: i32) -> io::Result<()> {
         self.inner.write_all(&v.to_be_bytes())
@@ -97,6 +102,12 @@ fn modified_utf8(s: &str) -> Vec<u8> {
         }
     }
     out
+}
+
+/// Number of bytes `writeUTF(s)` produces (2-byte length prefix + modified UTF-8 bytes).
+/// Used for byte-exact output-size accounting in the bref writer.
+pub fn utf_byte_len(s: &str) -> usize {
+    2 + modified_utf8(s).len()
 }
 
 /// Java `DataInputStream` read methods over any [`Read`].

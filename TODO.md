@@ -228,8 +228,13 @@ until they pass, then add the parity check. File counts in parens.
       `UnBref3`). **Byte-exact** target.
 - [ ] `main` (5) — `Par` (CLI arg parsing — define the full arg surface), `Main`, `Pedigree`,
       `RunStats`, `WindowWriter`. Match arg names/defaults exactly.
-- [ ] `phase` (30) — phasing engine: PBWT/IBS (`Pbwt*Phaser`, `Ibs2*`), HMM (`PhaseBaum*`,
-      `HmmUpdater`), Li-Stephens (`PhaseLS`), `SamplePhase`, `FixedPhaseData`. Core algorithm; FP-sensitive.
+- [x] `phase` (30) ✅ — phasing engine fully ported: PBWT/IBS (`Pbwt*Phaser`, `Ibs2*`,
+      `Low*PhaseIbs`), HMM states (`Basic/LowFreqPhaseStates`), forward-backward HMM
+      (`PhaseBaum2`, `HmmUpdater`, `HmmStateProbs`, `HmmParamData`), Li-Stephens driver
+      (`PhaseLS` stage1/stage2), `Stage2Baum/Stage2Haps`, `SamplePhase`, `MarkerCluster`,
+      `EstPhase`, `CodedSteps`, `PhaseData`, `FixedPhaseData`. Added `jdk::PriorityQueue`
+      (Java-exact heap, tie-breaking verified) for composite-hap construction. 234 unit tests.
+      Quirk: `EstPhase.get()` clones (Java shares one object) — see docs/known-quirks.md.
 - [ ] `imp` (12) — imputation engine: `ImpData`, `ImpIbs`, `ImpLS`/`ImpLSBaum`, `HaplotypeCoder`,
       `ImputedRecBuilder`, `ImputedVcfWriter`, `StateProbs`. Core algorithm; FP-sensitive.
 
