@@ -7,11 +7,12 @@
 use std::collections::VecDeque;
 use std::io::{self, Read};
 use std::path::Path;
+use std::rc::Rc;
 use std::sync::OnceLock;
 
 use crate::beagleutil::ChromIds;
 use crate::blbutil::{consts, Filter, Utilities};
-use crate::ints::{CharArray, UnsignedByteArray};
+use crate::ints::{CharArray, IntArray, UnsignedByteArray};
 use crate::jdk_io::DataIn;
 use crate::vcf::{
     allele_ref_gt_rec_from_components, HapRefGTRec, Marker, MarkerParser, RefGTRec, Samples,
@@ -107,7 +108,15 @@ impl Bref3Reader {
         let chrom_index = ChromIds::instance().get_index(&chrom);
         let n_seq = di.read_unsigned_short()?;
         di.read_fully(&mut self.byte_buffer)?;
-        let hap_to_seq = self.hap_to_seq();
+        // One shared hap_to_seq map per block, so all seq-coded records in the block compare
+        // equal by identity (`seq_block_key`) — relied on by HaplotypeCoder.isHapCoded and the
+        // bref writer's block grouping.
+        let char_array = self.hap_to_seq();
+        let hap_to_seq = Rc::new(
+            (0..char_array.size())
+                .map(|i| char_array.get(i))
+                .collect::<Vec<i32>>(),
+        );
         for _ in 0..n_recs {
             let marker = read_marker(di, chrom_index)?;
             let flag = di.read_byte()?;
@@ -141,15 +150,15 @@ impl Bref3Reader {
         &mut self,
         di: &mut DataIn<R>,
         marker: Marker,
-        hap_to_seq: &CharArray,
+        hap_to_seq: &Rc<Vec<i32>>,
         n_seq: i32,
     ) -> io::Result<Box<dyn RefGTRec>> {
         di.read_fully(&mut self.byte_buffer[0..n_seq as usize])?;
         let seq_to_allele = UnsignedByteArray::from_bytes_range(&self.byte_buffer, 0, n_seq);
-        Ok(Box::new(HapRefGTRec::new(
+        Ok(Box::new(HapRefGTRec::new_shared(
             marker,
             self.samples.clone(),
-            hap_to_seq,
+            hap_to_seq.clone(),
             &seq_to_allele,
         )))
     }
