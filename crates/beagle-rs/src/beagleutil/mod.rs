@@ -5,10 +5,18 @@
 //! (`ChromInterval`, `CompHapSegment`, `PbwtUpdater`, `PbwtDivUpdater` land next.)
 
 mod chrom_ids;
+mod chrom_interval;
+mod comp_hap_segment;
+mod pbwt_div_updater;
+mod pbwt_updater;
 mod sample_ids;
 mod thread_safe_indexer;
 
 pub use chrom_ids::ChromIds;
+pub use chrom_interval::ChromInterval;
+pub use comp_hap_segment::CompHapSegment;
+pub use pbwt_div_updater::PbwtDivUpdater;
+pub use pbwt_updater::PbwtUpdater;
 pub use sample_ids::SampleIds;
 pub use thread_safe_indexer::ThreadSafeIndexer;
 
