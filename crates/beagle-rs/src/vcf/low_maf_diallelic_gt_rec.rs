@@ -41,6 +41,31 @@ impl LowMafDiallelicGTRec {
         }
     }
 
+    /// `new LowMafDiallelicGTRec(VcfRecGTParser.HapListRep listRep)`.
+    pub fn from_hap_list_rep(list_rep: &super::HapListRep) -> Self {
+        assert!(
+            list_rep.marker().n_alleles() == 2,
+            "{}",
+            list_rep.marker().n_alleles()
+        );
+        let major = list_rep.major_allele();
+        let minor = (1 - major) as usize;
+        let minor_alleles = list_rep
+            .hap_lists(true)
+            .into_iter()
+            .nth(minor)
+            .flatten()
+            .expect("minor allele hap list");
+        LowMafDiallelicGTRec::new(
+            list_rep.marker().clone(),
+            list_rep.samples().clone(),
+            major,
+            minor_alleles,
+            list_rep.missing_samples(),
+            list_rep.is_phased(),
+        )
+    }
+
     /// `majorAllele()`.
     pub fn major_allele(&self) -> i32 {
         self.major_allele

@@ -8,6 +8,7 @@ mod bit_array;
 mod filter;
 mod float_arrays;
 mod input_it;
+mod sample_file_it;
 mod string_util;
 mod utilities;
 
@@ -16,6 +17,7 @@ pub use bit_array::BitArray;
 pub use filter::Filter;
 pub use float_arrays::{DoubleArray, FloatArray, FloatList};
 pub use input_it::{FileIt, InputIt};
+pub use sample_file_it::{SampleFileIt, VcfFileIt};
 pub use string_util::StringUtil;
 pub use utilities::Utilities;
 

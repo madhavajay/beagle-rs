@@ -42,6 +42,18 @@ impl LowMafGTRec {
         }
     }
 
+    /// `new LowMafGTRec(VcfRecGTParser.HapListRep listRep)`.
+    pub fn from_hap_list_rep(list_rep: &super::HapListRep) -> Self {
+        LowMafGTRec::new(
+            list_rep.marker().clone(),
+            list_rep.samples().clone(),
+            list_rep.major_allele(),
+            list_rep.hap_lists(true),
+            list_rep.missing_samples(),
+            list_rep.is_phased(),
+        )
+    }
+
     /// `majorAllele()`.
     pub fn major_allele(&self) -> i32 {
         self.major_allele
