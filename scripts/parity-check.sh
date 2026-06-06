@@ -64,6 +64,32 @@ else
   echo "  (skipped Java comparison — reference/unbref3.local.jar absent)"
 fi
 
+# pypgx-style invocations (chrom=<region> + ref= + em=/impute=) compared live against the jar.
+# No committed golden (a Java run bakes today's local ##filedate); compared modulo that field.
+JAR="$ROOT/reference/beagle.local.jar"
+if [ -f "$JAR" ]; then
+  echo ">> pypgx-pattern invocations (chrom=/em=/impute=, vs the jar, modulo ##filedate)"
+  # Decompress to a file first so `head`/`sed` don't SIGPIPE the zcat producer under pipefail.
+  zcat ref.$V.vcf.gz | grep -v '^#' > ref.records
+  CHR=$(head -n1 ref.records | cut -f1)
+  P1=$(head -n1 ref.records | cut -f2)
+  PMID=$(sed -n '700p' ref.records | cut -f2)
+  REGION="$CHR:$P1-$PMID"
+  pnorm() { zcat "$1" | grep -v '^##filedate'; }
+  check_jar() { # <label> <args...>
+    local label="$1"; shift; rm -f pr.vcf.gz pj.vcf.gz
+    "$BEAGLE"      "$@" out=pr nthreads=$THREADS seed=$SEED >/dev/null 2>&1
+    java -jar "$JAR" "$@" out=pj nthreads=$THREADS seed=$SEED >/dev/null 2>&1
+    if cmp -s <(pnorm pr.vcf.gz) <(pnorm pj.vcf.gz); then echo "  ✅ $label"; else echo "  ❌ $label — DIFFERS"; fail=1; fi
+  }
+  check_jar "ref=<vcf> chrom=$REGION"            ref=ref.$V.vcf.gz gt=target.$V.vcf.gz chrom=$REGION
+  check_jar "ref=<vcf> chrom + em=false"         ref=ref.$V.vcf.gz gt=target.$V.vcf.gz chrom=$REGION em=false
+  check_jar "ref=<vcf> chrom + impute=false"     ref=ref.$V.vcf.gz gt=target.$V.vcf.gz chrom=$REGION impute=false
+  check_jar "ref=<bref3> chrom + em=false"       ref=ref.$V.bref3  gt=target.$V.vcf.gz chrom=$REGION em=false
+else
+  echo "  (skipped pypgx-pattern jar comparison — reference/beagle.local.jar absent)"
+fi
+
 if [ $fail -eq 0 ]; then
   echo ">> PARITY OK — all outputs byte-identical to the Java reference"
 else
