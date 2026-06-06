@@ -22,6 +22,7 @@ pub use input_it::{FileIt, InputIt};
 pub use sample_file_it::{SampleFileIt, VcfFileIt};
 pub use string_util::StringUtil;
 pub use utilities::Utilities;
+pub mod validate;
 
 /// Port of `blbutil/Const.java` — string/character/numeric constants. (Java field
 /// names are lower-case, e.g. `Const.tab`; here they follow Rust `SCREAMING_CASE`.)
