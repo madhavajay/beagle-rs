@@ -5,6 +5,11 @@ use std::collections::HashSet;
 use std::hash::Hash;
 
 /// Port of `blbutil/Filter.java`.
+///
+/// Java's `Filter<E>` is a `@FunctionalInterface` (`boolean accept(E)`), so callers can
+/// supply arbitrary lambdas (e.g. `FilterUtil`'s marker/chrom-interval filters). The common
+/// set-membership cases are modeled as enum variants; the `Predicate` variant carries an
+/// arbitrary closure for the rest.
 pub enum Filter<E: Eq + Hash> {
     /// `acceptAllFilter()`.
     AcceptAll,
@@ -12,6 +17,8 @@ pub enum Filter<E: Eq + Hash> {
     Include(HashSet<E>),
     /// `excludeFilter(exclude)` — accept iff not contained.
     Exclude(HashSet<E>),
+    /// An arbitrary predicate (a Java lambda `Filter<E>`).
+    Predicate(Box<dyn Fn(&E) -> bool>),
 }
 
 impl<E: Eq + Hash> Filter<E> {
@@ -30,12 +37,18 @@ impl<E: Eq + Hash> Filter<E> {
         Filter::Exclude(exclude.into_iter().collect())
     }
 
+    /// A `Filter` from an arbitrary predicate (a Java lambda `Filter<E>`).
+    pub fn predicate<F: Fn(&E) -> bool + 'static>(f: F) -> Self {
+        Filter::Predicate(Box::new(f))
+    }
+
     /// `accept(E e)`.
     pub fn accept(&self, e: &E) -> bool {
         match self {
             Filter::AcceptAll => true,
             Filter::Include(s) => s.contains(e),
             Filter::Exclude(s) => !s.contains(e),
+            Filter::Predicate(f) => f(e),
         }
     }
 }

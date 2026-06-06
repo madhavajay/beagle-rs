@@ -9,6 +9,7 @@ mod basic_gt;
 mod basic_gt_rec;
 mod bit_array_gt_rec;
 mod bit_array_ref_gt_rec;
+mod filter_util;
 mod genetic_map;
 mod gt;
 mod gt_rec;
@@ -44,6 +45,10 @@ pub use basic_gt::{genotype, BasicGT};
 pub use basic_gt_rec::BasicGTRec;
 pub use bit_array_gt_rec::BitArrayGTRec;
 pub use bit_array_ref_gt_rec::BitArrayRefGTRec;
+pub use filter_util::{
+    chrom_int_filter, exclude_id_filter, marker_filter, marker_is_in_set, sample_filter,
+    sample_filter_inc_exc,
+};
 pub use genetic_map::{
     gen_pos_markers, gen_pos_markers_min_dist, genetic_map_from_file, GeneticMap,
 };

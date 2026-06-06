@@ -1,9 +1,9 @@
 //! Port of `beagleutil/ChromInterval.java` — a chromosome interval `[start, end]` in
-//! genome coordinates. The two `vcf::Marker`-based members (the `(Marker, Marker)`
-//! constructor and `contains(Marker)`) are deferred until `vcf::Marker` is ported.
+//! genome coordinates.
 
 use super::{ChromIds, IntInterval};
 use crate::blbutil::consts;
+use crate::vcf::Marker;
 
 /// Port of `beagleutil/ChromInterval.java`. Field order matches Java `compareTo`
 /// (chromIndex, start, end) so the derived `Ord` is identical.
@@ -84,6 +84,29 @@ impl ChromInterval {
             }
             Some(ChromInterval::new(&s[0..chr_delim as usize], start, end))
         }
+    }
+
+    /// `new ChromInterval(Marker start, Marker end)`.
+    pub fn from_markers(start: &Marker, end: &Marker) -> Self {
+        assert!(
+            start.chrom_index() == end.chrom_index(),
+            "start.chromIndex() != end.chromIndex()"
+        );
+        assert!(
+            start.pos() >= 0 && start.pos() <= end.pos(),
+            "start={start} end={end}"
+        );
+        ChromInterval {
+            chrom_index: start.chrom_index(),
+            start: start.pos(),
+            end: end.pos(),
+        }
+    }
+
+    /// `contains(Marker marker)` — true iff the marker lies in this interval.
+    pub fn contains(&self, marker: &Marker) -> bool {
+        let pos = marker.pos();
+        marker.chrom_index() == self.chrom_index && self.start <= pos && pos <= self.end
     }
 
     /// `chromIndex()`.

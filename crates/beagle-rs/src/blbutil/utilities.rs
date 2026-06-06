@@ -1,10 +1,12 @@
-//! Port of `blbutil/Utilities.java` (the package-independent parts). IO-dependent
-//! helpers (`idSet`, `duoPrint*`) and runtime/time helpers (`timeStamp`,
-//! `printMemoryUse`, `commandLine`) are ported alongside the file-IO chunk / `main`.
+//! Port of `blbutil/Utilities.java` (the package-independent parts). The remaining
+//! IO-dependent helpers (`duoPrint*`) and runtime/time helpers (`timeStamp`,
+//! `printMemoryUse`, `commandLine`) are ported alongside `main`.
 
+use crate::blbutil::{InputIt, StringUtil};
 use crate::jdk::Random;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
+use std::path::Path;
 
 /// Port of `blbutil/Utilities.java` (static methods).
 pub struct Utilities;
@@ -78,6 +80,31 @@ impl Utilities {
             }
         }
         [idx0, idx1]
+    }
+
+    /// `idSet(File file)` — the set of trimmed, non-empty single-field lines of `file`
+    /// (`None` → empty set). Panics if the file is missing, a directory, or any line has
+    /// more than one white-space-delimited field.
+    pub fn id_set(file: Option<&Path>) -> HashSet<String> {
+        let mut id_set = HashSet::new();
+        let Some(file) = file else {
+            return id_set;
+        };
+        assert!(file.exists(), "file does not exist: {}", file.display());
+        assert!(!file.is_dir(), "file is a directory: {}", file.display());
+        for line in InputIt::from_gzip_file(file) {
+            let line = line.trim();
+            if !line.is_empty() {
+                assert!(
+                    StringUtil::count_fields_ws(line) <= 1,
+                    "Line has more than one white-space delimited field (file: '{}'; line: '{}')",
+                    file.display(),
+                    line
+                );
+                id_set.insert(line.to_string());
+            }
+        }
+        id_set
     }
 
     /// `exit(String s)` — print to stderr and terminate with exit code 1.
