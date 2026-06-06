@@ -5,6 +5,7 @@
 //! so far: `Samples`, `Marker` (+ `MarkerUtils`, `MarkerParser`).
 
 mod allele_ref_gt_rec;
+mod basic_gt;
 mod basic_gt_rec;
 mod bit_array_gt_rec;
 mod bit_array_ref_gt_rec;
@@ -32,6 +33,7 @@ mod vcf_rec_gt_parser;
 mod vcf_writer;
 
 pub use allele_ref_gt_rec::AlleleRefGTRec;
+pub use basic_gt::{genotype, BasicGT};
 pub use basic_gt_rec::BasicGTRec;
 pub use bit_array_gt_rec::BitArrayGTRec;
 pub use bit_array_ref_gt_rec::BitArrayRefGTRec;
