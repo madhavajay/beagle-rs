@@ -268,9 +268,14 @@ until they pass, then add the parity check. File counts in parens.
       argument-matrix sweep (gp/ap/window/overlap/burnin/iterations/em/impute/cluster/alt-seed)
       is content-identical to the jar; no-args usage byte-identical.
 - [ ] Resolve the **preserve-vs-fix** bug decisions in one dedicated commit (kestrel-rs pattern).
-- [ ] pypgx CYP4F2 acceptance: vendor the CYP4F2 fixtures (Phase 2 pypgx item), run parity, then
-      wire `beagle-rs` into `pypgx-rs/src/external.rs` to replace the `NotPorted` stub. Requires the
-      external pypgx data (not yet vendored).
+- [x] **pypgx invocation pattern verified** — the exact command pypgx issues
+      (`gt= ref= chrom=<region> em=/impute=`) is byte-identical to the jar for region-restricted
+      VCF-ref, bref3-ref, `em=false`, and `impute=false` (see `scripts/parity-check.sh`).
+- [ ] pypgx CYP4F2 **acceptance run**: BLOCKED offline — needs the `~/pypgx-bundle` 1KGP reference
+      panel (downloaded separately; absent here) to produce/compare golden CYP4F2 imputation. The
+      tiny CYP4F2 target zips are in `pypgx-rs/tests/fixtures/`, but imputation needs the panel.
+      When the bundle is available: generate golden via our 5.5 jar, add a parity case, then wire
+      `beagle-rs` into `pypgx-rs/src/external.rs` (separate repo) to replace the `NotPorted` stub.
 
 ---
 
