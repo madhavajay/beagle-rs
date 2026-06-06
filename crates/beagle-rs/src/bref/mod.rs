@@ -5,9 +5,11 @@ use crate::jdk_io::DataIn;
 use std::io::{self, Read};
 
 mod bref3_header;
+mod bref3_reader;
 mod bref_block;
 
 pub use bref3_header::Bref3Header;
+pub use bref3_reader::Bref3Reader;
 pub use bref_block::BrefBlock;
 
 /// `AsIsBref3Writer.END_OF_DATA`.
