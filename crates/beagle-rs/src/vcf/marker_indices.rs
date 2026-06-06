@@ -34,7 +34,7 @@ fn targ_index(targ_marker_to_marker: &[i32], marker: i32) -> i32 {
 
 fn targ_marker_to_marker_from(in_targ: &[bool]) -> Vec<i32> {
     // Java sizes an IntList with `1 + inTarg.length>>6` == `(1 + len) >> 6` (capacity only).
-    let mut il = Vec::with_capacity(((1 + in_targ.len()) >> 6).max(0));
+    let mut il = Vec::with_capacity((1 + in_targ.len()) >> 6);
     for (j, &t) in in_targ.iter().enumerate() {
         if t {
             il.push(j as i32);
