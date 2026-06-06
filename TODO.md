@@ -157,13 +157,14 @@ Toolchain present (2026-06-06): **Java 26** (`javac` 26 — compiles the Java 8 
       Rust `unbref3` must reproduce this canonicalization, not the original header.
 - Note: default multi-thread runs not yet checked for determinism — port targets `nthreads=1` first.
 
-## Phase 2 — Test data acquisition
-- [ ] Vendor the official tiny example data (`test/ref/target` + `ref.bref3`) under `fixtures/official/`.
+## Phase 2 — Test data acquisition  (official ✅ / pypgx pending)
+- [x] Vendored the official tiny example data (`test/ref/target` + `ref.bref3`) under `fixtures/official/inputs/`.
+- [x] `scripts/make-fixtures.sh` runs the Java jar with fixed `seed`/`nthreads` and stores golden
+      `out.{gt,ref,bref3}.vcf.gz` under `fixtures/official/golden/` + `MANIFEST.md` (commands + sha256).
+- [x] Characterized the bref3 round-trip (see Phase 1) — `unbref3` canonicalizes the VCF header.
 - [ ] Extract `CYP4F2` VCFs from the pypgx zips into `fixtures/pypgx/`; obtain/trim a matching 1KGP
-      micro-panel so the run is self-contained and fast.
-- [ ] Build a script that, for each fixture, runs the Java jar with fixed seed/threads and stores
-      `out.*.vcf.gz` (+ logs) as golden outputs.
-- [ ] Add at least one **bref3 round-trip** fixture (VCF → bref3 → VCF via `unbref3`) for the binary-format port.
+      micro-panel so the run is self-contained and fast. **Blocked on the pypgx-bundle 1KGP panel**
+      (downloaded separately; not present locally) — needed to produce golden imputation output.
 
 ## Phase 3 — Java unit tests → ~90% line coverage  ← gate before any Rust
 The Java source ships **no tests** (confirmed: 0 `*Test*` files, no JUnit). Build them.
