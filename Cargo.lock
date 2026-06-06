@@ -13,6 +13,7 @@ name = "beagle-rs"
 version = "0.0.0"
 dependencies = [
  "flate2",
+ "libz-sys",
 ]
 
 [[package]]

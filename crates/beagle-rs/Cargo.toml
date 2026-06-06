@@ -12,5 +12,8 @@ path = "src/lib.rs"
 
 [dependencies]
 flate2 = { workspace = true }
+# Force the vendored static classic zlib so BGZIP deflate output is identical on every
+# platform (a system zlib-ng would emit different bytes and break byte-for-byte parity).
+libz-sys = { version = "1", default-features = false, features = ["static"] }
 
 [dev-dependencies]
