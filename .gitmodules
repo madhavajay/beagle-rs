@@ -1,0 +1,3 @@
+[submodule "beagle"]
+	path = beagle
+	url = git@github.com:madhavajay/beagle.git
