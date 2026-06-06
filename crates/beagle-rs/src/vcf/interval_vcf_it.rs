@@ -1,42 +1,72 @@
 //! Port of `vcf/IntervalVcfIt.java` — a `SampleFileIt` that skips leading records outside
 //! a chromosome interval, then yields the contiguous run of records inside it (stopping at
 //! the first record past the interval, assuming position-sorted input).
+//!
+//! Java's `IntervalVcfIt<E extends GTRec>` works over any record type; the Rust port is
+//! generic over any item that exposes a `Marker` (the `Marked` trait), so it wraps both
+//! target (`Box<dyn GTRec>`) and reference (`Box<dyn RefGTRec>`) iterators.
 
 use std::path::Path;
 
 use crate::beagleutil::ChromInterval;
 use crate::blbutil::{FileIt, SampleFileIt};
 
-use super::{GTRec, Samples};
+use super::{GTRec, Marker, RefGTRec, Samples};
 
-type Rec = Box<dyn GTRec>;
-
-/// Port of `vcf/IntervalVcfIt.java`.
-pub struct IntervalVcfIt<I: SampleFileIt<Item = Rec>> {
-    it: I,
-    interval: ChromInterval,
-    next: Option<Rec>,
+/// An item that exposes its `Marker` (record types yielded by VCF/bref iterators).
+pub trait Marked {
+    /// The record's marker.
+    fn marker(&self) -> &Marker;
 }
 
-fn read_first_record<I: SampleFileIt<Item = Rec>>(
-    it: &mut I,
-    interval: &ChromInterval,
-) -> Option<Rec> {
+impl Marked for Box<dyn GTRec> {
+    fn marker(&self) -> &Marker {
+        (**self).marker()
+    }
+}
+
+impl Marked for Box<dyn RefGTRec> {
+    fn marker(&self) -> &Marker {
+        (**self).marker()
+    }
+}
+
+/// Port of `vcf/IntervalVcfIt.java`.
+pub struct IntervalVcfIt<I>
+where
+    I: SampleFileIt,
+    I::Item: Marked,
+{
+    it: I,
+    interval: ChromInterval,
+    next: Option<I::Item>,
+}
+
+fn read_first_record<I>(it: &mut I, interval: &ChromInterval) -> Option<I::Item>
+where
+    I: SampleFileIt,
+    I::Item: Marked,
+{
     it.by_ref()
         .find(|candidate| interval.contains(candidate.marker()))
 }
 
-fn read_next_record<I: SampleFileIt<Item = Rec>>(
-    it: &mut I,
-    interval: &ChromInterval,
-) -> Option<Rec> {
+fn read_next_record<I>(it: &mut I, interval: &ChromInterval) -> Option<I::Item>
+where
+    I: SampleFileIt,
+    I::Item: Marked,
+{
     match it.next() {
         Some(candidate) if interval.contains(candidate.marker()) => Some(candidate),
         _ => None,
     }
 }
 
-impl<I: SampleFileIt<Item = Rec>> IntervalVcfIt<I> {
+impl<I> IntervalVcfIt<I>
+where
+    I: SampleFileIt,
+    I::Item: Marked,
+{
     /// `new IntervalVcfIt(SampleFileIt it, ChromInterval chromInt)`.
     pub fn new(mut it: I, chrom_int: ChromInterval) -> Self {
         let first_record = read_first_record(&mut it, &chrom_int);
@@ -54,23 +84,35 @@ impl<I: SampleFileIt<Item = Rec>> IntervalVcfIt<I> {
     }
 }
 
-impl<I: SampleFileIt<Item = Rec>> Iterator for IntervalVcfIt<I> {
-    type Item = Rec;
+impl<I> Iterator for IntervalVcfIt<I>
+where
+    I: SampleFileIt,
+    I::Item: Marked,
+{
+    type Item = I::Item;
 
-    fn next(&mut self) -> Option<Rec> {
+    fn next(&mut self) -> Option<I::Item> {
         let current = self.next.take()?;
         self.next = read_next_record(&mut self.it, &self.interval);
         Some(current)
     }
 }
 
-impl<I: SampleFileIt<Item = Rec>> FileIt for IntervalVcfIt<I> {
+impl<I> FileIt for IntervalVcfIt<I>
+where
+    I: SampleFileIt,
+    I::Item: Marked,
+{
     fn file(&self) -> Option<&Path> {
         self.it.file()
     }
 }
 
-impl<I: SampleFileIt<Item = Rec>> SampleFileIt for IntervalVcfIt<I> {
+impl<I> SampleFileIt for IntervalVcfIt<I>
+where
+    I: SampleFileIt,
+    I::Item: Marked,
+{
     fn samples(&self) -> &Samples {
         self.it.samples()
     }

@@ -29,6 +29,7 @@ mod position_map;
 mod ref_gt;
 mod ref_gt_rec;
 mod ref_it;
+mod ref_targ_sliding_window;
 mod restricted_gt;
 mod samples;
 mod sliding_window;
@@ -62,7 +63,7 @@ pub use gt::GT;
 pub use gt_rec::{allele_counts, allele_freq, to_vcf_rec, GTRec};
 pub use hap_ref_gt_rec::HapRefGTRec;
 pub use int_array_ref_gt_rec::IntArrayRefGTRec;
-pub use interval_vcf_it::IntervalVcfIt;
+pub use interval_vcf_it::{IntervalVcfIt, Marked};
 pub use low_maf_diallelic_gt_rec::LowMafDiallelicGTRec;
 pub use low_maf_gt_rec::LowMafGTRec;
 pub use marker::Marker;
@@ -78,6 +79,7 @@ pub use ref_gt_rec::{
     RefGTRec,
 };
 pub use ref_it::RefIt;
+pub use ref_targ_sliding_window::RefTargSlidingWindow;
 pub use restricted_gt::RestrictedGT;
 pub use samples::Samples;
 pub use sliding_window::SlidingWindow;
