@@ -3,7 +3,7 @@
 
 use std::rc::Rc;
 
-use crate::ints::{IntList, WrappedIntArray};
+use crate::ints::{IntArray, IntList, WrappedIntArray};
 
 use super::{BasicGT, GeneticMap, MarkerIndices, RefGT, GT};
 
@@ -20,6 +20,25 @@ pub enum CarrierList {
     ZeroFreq,
     /// `Window.HIGH_FREQ_ARRAY` — carriers exceed `maxCarriers`.
     HighFreq,
+}
+
+impl CarrierList {
+    /// `size()` viewing the carrier list as Java's `IntArray`; both empty sentinels
+    /// (`ZeroFreq`, `HighFreq`) have size 0.
+    pub fn size(&self) -> i32 {
+        match self {
+            CarrierList::List(wia) => wia.size(),
+            CarrierList::ZeroFreq | CarrierList::HighFreq => 0,
+        }
+    }
+
+    /// `get(int index)` — the `index`-th carrier sample (only `List` has elements).
+    pub fn get(&self, index: i32) -> i32 {
+        match self {
+            CarrierList::List(wia) => wia.get(index),
+            _ => panic!("index out of bounds: {index}"),
+        }
+    }
 }
 
 /// Port of `vcf/Window.java`.
