@@ -31,8 +31,10 @@ mod ref_gt_rec;
 mod ref_it;
 mod restricted_gt;
 mod samples;
+mod sliding_window;
 mod spliced_gt;
 mod steps;
+mod targ_sliding_window;
 mod two_allele_ref_gt_rec;
 mod vcf_header;
 mod vcf_it;
@@ -78,8 +80,10 @@ pub use ref_gt_rec::{
 pub use ref_it::RefIt;
 pub use restricted_gt::RestrictedGT;
 pub use samples::Samples;
+pub use sliding_window::SlidingWindow;
 pub use spliced_gt::SplicedGT;
 pub use steps::Steps;
+pub use targ_sliding_window::TargSlidingWindow;
 pub use two_allele_ref_gt_rec::TwoAlleleRefGTRec;
 pub use vcf_header::{VcfHeader, HEADER_PREFIX};
 pub use vcf_it::{
