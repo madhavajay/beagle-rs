@@ -39,3 +39,11 @@ Default stance: **preserve** (byte-for-byte parity is the goal).
 | vcf-3 | `PlinkGenMap.closestIndex` | The out-of-range branch tests `insPt == basePos.length` (the chromosome-count / outer-array length) instead of `basePos[chrom].length`, so the right-edge clamp is keyed off the wrong bound. Preserved. | preserve |
 | vcf-4 | `VcfRecGTParser.storeAlleles(BitArray, BitArray)` | Stores `a1` into **both** haplotypes (`storeAllele(...h1...a1)` then `storeAllele(...h2...a1)`), never `a2`, so the second allele of every diploid genotype is dropped. **Latent**: the only caller is the `BitArrayGTRec(VcfRecGTParser)` constructor, which is never invoked in-tree (`VcfIt` builds `BitArrayGTRec` via the `HapListRep` constructor, which is correct). The sibling `storeAlleles(int[], boolean[])` overload (used by `BasicGTRec`) is correct. Preserved bit-for-bit in `store_alleles_bits`. | preserve (latent) |
 | vcf-5 | `RefGT.restrict(RefGT, int[])` (static) | Builds the restricted `RefGTRec[]` but constructs the new `RefGT` with `refGT.markers` (the **full** marker list) instead of a restricted one, so its own `checkData` only passes when `indices.length == refGT.nMarkers()`. **Latent**: never called in-tree (only the instance `restrict(Markers,int[])` and `restrict(int,int)` overloads are used). Preserved. | preserve (latent) |
+
+## Cross-language numeric parity risks
+
+These are not Beagle bugs but places where Rust↔Java floating-point results could differ; tracked for the end-to-end byte-exact harness.
+
+| ID | Location | Risk | Mitigation |
+|----|----------|------|------------|
+| num-1 | `MarkerMap.pRecomb` (`-Math.expm1(c*genDist)`) | Java `Math.expm1` vs Rust `f64::exp_m1` are independent libm implementations of `e^x - 1`; results may differ by ~1 ULP, which can cascade through the HMM. | Verify against Java in the parity harness; if it diverges, vendor an fdlibm `expm1` to match `StrictMath`. |
