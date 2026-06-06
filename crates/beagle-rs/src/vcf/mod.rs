@@ -34,6 +34,7 @@ mod vcf_rec;
 mod vcf_rec_builder;
 mod vcf_rec_gt_parser;
 mod vcf_writer;
+mod xref_gt;
 
 pub use allele_ref_gt_rec::AlleleRefGTRec;
 pub use basic_gt::{genotype, BasicGT};
@@ -69,3 +70,4 @@ pub use vcf_writer::{
     append_records_gt, append_records_recs, print_fixed_fields_gt, write_meta_lines,
     write_meta_lines_gt,
 };
+pub use xref_gt::XRefGT;
