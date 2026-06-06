@@ -7,10 +7,13 @@
 //!
 //! Ported packages (bottom-up):
 //! - [`ints`] — integer-packed immutable arrays + maps (Java package `ints`).
+//! - [`blbutil`] — base utilities: constants, float/double arrays, bit arrays, string
+//!   splitting, BGZIP, file IO (Java package `blbutil`).
 
 // The port mirrors Java's explicit bound checks (`x >= lo && x <= hi`) verbatim so the
 // Rust lines correspond directly to the original source; clippy reads that as a
 // `manual_range_contains` candidate. Keeping the Java form aids review/parity.
 #![allow(clippy::manual_range_contains)]
 
+pub mod blbutil;
 pub mod ints;

@@ -267,6 +267,14 @@ until they pass, then add the parity check. File counts in parens.
 - **Scope:** **full Beagle** — phasing + imputation + bref3/unbref3 tools.
 - **RNG:** confirmed `java.util.Random` only, deterministically seeded from `seed=`; replicable in Rust
   and thread-count-independent (see [gotchas](#known-gotchas--risks)).
+- **IO / dependencies:** Beagle has **zero third-party deps** — it hand-rolls VCF parse/write, BGZIP
+  read/write (`java.util.zip`), bref3, and the PLINK map parser on the JDK stdlib (no htsjdk/htslib/
+  samtools). Decision: **port Beagle's own IO faithfully** (parsers + writers) rather than reuse
+  `noodles`/`htslib-rs`/`bcftools-rs`, because byte-exact output is defined by Beagle's own VCF
+  formatting + BGZIP block layout + Java `Deflater`, and the input model needs Beagle's exact allele
+  coding. Use **`flate2` (zlib/zlib-ng backend) as the only compression primitive** (matches Java
+  `Deflater` for byte-identical writes; any inflater is fine for reads). The existing Rust ports stay as
+  *validation oracles* (sanity-check our VCFs), not runtime deps.
 
 ## Open questions
 - [ ] How small can the 1KGP micro-panel be trimmed while still exercising imputation realistically?

@@ -1,0 +1,13 @@
+# blbutil parity transcript (Beagle 5.5 27Feb25.75f)
+bitarray words=[-8862375877793529719, 5801483236199702624, 6937937072158937248, 16]
+bitarray getAsInt[0,7,63,64,193]=1,1,-1,0,0
+bitarray restrict5_130 size=125 words=[299511506122375684, 181296351131240707]
+bitarray hash 0_200=-1946913017 hash 5_130=-810490180
+bitarray copyfrom10_150 words=[-8862375877793529856, 5801483236199702624, 790688, 0]
+bitarray longHashCode=-2004318072
+split_tab=a|b||c|
+split_tab_limit2=a|b	c	d
+count_tab=3 count_tab_max2=2
+split_ws=hello|world|foo
+split_ws_limit2=hello|world  foo
+count_ws=3
