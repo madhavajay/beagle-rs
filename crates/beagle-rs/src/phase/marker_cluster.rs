@@ -65,6 +65,18 @@ impl MarkerCluster {
         &self.sample_phase
     }
 
+    /// Mutable access to the estimated haplotypes. Java mutates the shared `SamplePhase`
+    /// object that `samplePhase()` returns; the Rust port owns its clone, which the caller
+    /// stores back into `EstPhase` after the HMM update (see [[estphase-get-set-aliasing]]).
+    pub fn sample_phase_mut(&mut self) -> &mut SamplePhase {
+        &mut self.sample_phase
+    }
+
+    /// Consumes the `MarkerCluster`, returning the (now HMM-updated) `SamplePhase`.
+    pub fn into_sample_phase(self) -> SamplePhase {
+        self.sample_phase
+    }
+
     /// `nClusters()`.
     pub fn n_clusters(&self) -> i32 {
         self.cluster_to_end.len() as i32
