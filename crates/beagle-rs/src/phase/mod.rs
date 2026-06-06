@@ -3,6 +3,7 @@
 
 mod hmm_updater;
 mod ibs2_markers;
+mod ibs2_sets;
 mod param_estimates;
 mod sample_phase;
 mod sample_seg;
@@ -10,6 +11,7 @@ mod swap_rate;
 
 pub use hmm_updater::HmmUpdater;
 pub use ibs2_markers::Ibs2Markers;
+pub use ibs2_sets::Ibs2Sets;
 pub use param_estimates::ParamEstimates;
 pub use sample_phase::{ClustType, SamplePhase};
 pub use sample_seg::SampleSeg;
