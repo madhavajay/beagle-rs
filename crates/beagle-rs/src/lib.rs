@@ -15,6 +15,7 @@
 // `manual_range_contains` candidate. Keeping the Java form aids review/parity.
 #![allow(clippy::manual_range_contains)]
 
+pub mod beagleutil;
 pub mod blbutil;
 pub mod ints;
 pub mod jdk;
