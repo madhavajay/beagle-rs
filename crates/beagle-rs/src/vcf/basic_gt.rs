@@ -8,6 +8,7 @@ use std::rc::Rc;
 use super::{to_vcf_rec, GTRec, Marker, Markers, Samples, GT};
 
 /// Port of `vcf/BasicGT.java`.
+#[derive(Clone)]
 pub struct BasicGT {
     samples: Samples,
     markers: Markers,

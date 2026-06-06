@@ -10,6 +10,7 @@ use crate::vcf::Samples;
 const NO_PARENT: &str = "0";
 
 /// Port of `main/Pedigree.java`.
+#[derive(Clone)]
 pub struct Pedigree {
     samples: Samples,
     singles: Vec<i32>,

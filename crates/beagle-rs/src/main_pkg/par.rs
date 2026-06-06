@@ -34,6 +34,7 @@ const D_NTHREADS: i32 = i32::MAX;
 const D_BUFFER: f32 = 1.0;
 
 /// Port of `main/Par.java`.
+#[derive(Clone)]
 pub struct Par {
     args: Vec<String>,
     no_n_threads: bool,

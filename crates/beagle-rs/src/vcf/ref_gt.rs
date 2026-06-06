@@ -7,6 +7,7 @@ use std::rc::Rc;
 use super::{Marker, Markers, RefGTRec, Samples, GT};
 
 /// Port of `vcf/RefGT.java`.
+#[derive(Clone)]
 pub struct RefGT {
     markers: Markers,
     samples: Samples,
