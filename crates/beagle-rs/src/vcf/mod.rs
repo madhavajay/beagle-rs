@@ -14,6 +14,7 @@ pub mod marker_utils;
 mod markers;
 mod ref_gt_rec;
 mod samples;
+mod two_allele_ref_gt_rec;
 
 pub use allele_ref_gt_rec::AlleleRefGTRec;
 pub use basic_gt_rec::BasicGTRec;
@@ -22,5 +23,6 @@ pub use gt_rec::{allele_counts, allele_freq, to_vcf_rec, GTRec};
 pub use marker::Marker;
 pub use marker_parser::MarkerParser;
 pub use markers::Markers;
-pub use ref_gt_rec::RefGTRec;
+pub use ref_gt_rec::{allele_ref_gt_rec_from_components, allele_ref_gt_rec_from_rec, RefGTRec};
 pub use samples::Samples;
+pub use two_allele_ref_gt_rec::TwoAlleleRefGTRec;

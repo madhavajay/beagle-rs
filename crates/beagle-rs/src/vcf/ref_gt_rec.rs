@@ -6,7 +6,7 @@
 
 use crate::ints::{IndexArray, IntArray};
 
-use super::GTRec;
+use super::{AlleleRefGTRec, GTRec, Marker, Samples, TwoAlleleRefGTRec};
 
 /// Port of the `vcf/RefGTRec.java` interface.
 pub trait RefGTRec: GTRec {
@@ -46,6 +46,39 @@ pub trait RefGTRec: GTRec {
 
     /// `map(int index)`.
     fn map(&self, index: i32) -> Box<dyn IntArray>;
+}
+
+/// `RefGTRec.alleleRefGTRec(Marker, Samples, int[][])` — biallelic → `TwoAlleleRefGTRec`,
+/// otherwise `AlleleRefGTRec`.
+pub fn allele_ref_gt_rec_from_components(
+    marker: Marker,
+    samples: Samples,
+    allele_to_haps: Vec<Option<Vec<i32>>>,
+) -> Box<dyn RefGTRec> {
+    if marker.n_alleles() == 2 {
+        Box::new(TwoAlleleRefGTRec::from_components(
+            marker,
+            samples,
+            allele_to_haps,
+        ))
+    } else {
+        Box::new(AlleleRefGTRec::from_components(
+            marker,
+            samples,
+            allele_to_haps,
+        ))
+    }
+}
+
+/// `RefGTRec.alleleRefGTRec(RefGTRec)` — returns an allele-coded record. (Unlike Java,
+/// this always reconstructs rather than returning an already-allele-coded `rec` as-is;
+/// the result is identical for the immutable record.)
+pub fn allele_ref_gt_rec_from_rec(rec: &dyn RefGTRec) -> Box<dyn RefGTRec> {
+    if rec.marker().n_alleles() == 2 {
+        Box::new(TwoAlleleRefGTRec::from_ref_rec(rec))
+    } else {
+        Box::new(AlleleRefGTRec::from_ref_rec(rec))
+    }
 }
 
 /// Sum of the lengths of the non-`None` rows (number of non-major-allele haplotypes).

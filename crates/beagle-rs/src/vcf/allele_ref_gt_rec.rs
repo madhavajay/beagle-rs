@@ -30,7 +30,10 @@ fn check_sorted(ia: &[i32], n_haps: i32) {
 }
 
 /// `checkIndicesAndReturnNullIndex` — validates rows and returns the single `None` index.
-fn check_indices_and_return_null_index(hap_indices: &[Option<Vec<i32>>], n_haps: i32) -> i32 {
+pub(crate) fn check_indices_and_return_null_index(
+    hap_indices: &[Option<Vec<i32>>],
+    n_haps: i32,
+) -> i32 {
     let mut maj_allele: i32 = -1;
     for (j, row) in hap_indices.iter().enumerate() {
         match row {
