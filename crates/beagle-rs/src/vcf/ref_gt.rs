@@ -131,17 +131,17 @@ impl GT for RefGT {
         self.recs[marker as usize].get(haplotype)
     }
 
-    fn restrict(&self, markers: &Markers, indices: &[i32]) -> Box<dyn GT> {
+    fn restrict(self: Rc<Self>, markers: &Markers, indices: &[i32]) -> Rc<dyn GT> {
         let rra = select_strictly_increasing(&self.recs, indices);
-        Box::new(RefGT::new(markers.clone(), self.samples.clone(), rra))
+        Rc::new(RefGT::new(markers.clone(), self.samples.clone(), rra))
     }
 
-    fn restrict_range(&self, start: i32, end: i32) -> Box<dyn GT> {
+    fn restrict_range(self: Rc<Self>, start: i32, end: i32) -> Rc<dyn GT> {
         let restrict_markers = self.markers.restrict(start, end);
         let restrict_recs: Vec<Rc<dyn RefGTRec>> = (start..end)
             .map(|j| self.recs[j as usize].clone())
             .collect();
-        Box::new(RefGT::new(
+        Rc::new(RefGT::new(
             restrict_markers,
             self.samples.clone(),
             restrict_recs,
@@ -208,14 +208,14 @@ mod tests {
                 vec![None, Some(vec![1])],
             )
         };
-        let gt = RefGT::from_recs(vec![mk(100), mk(200), mk(300)]);
-        let sub = gt.restrict_range(1, 3);
+        let gt = Rc::new(RefGT::from_recs(vec![mk(100), mk(200), mk(300)]));
+        let sub = gt.clone().restrict_range(1, 3);
         assert_eq!(sub.n_markers(), 2);
         assert_eq!(sub.marker(0).pos(), 200);
 
         // Instance restrict(markers, indices): caller supplies the restricted markers.
         let restricted_markers = gt.markers.restrict_indices(&[0, 2]);
-        let sub2 = gt.restrict(&restricted_markers, &[0, 2]);
+        let sub2 = gt.clone().restrict(&restricted_markers, &[0, 2]);
         assert_eq!(sub2.n_markers(), 2);
         assert_eq!(sub2.marker(1).pos(), 300);
     }

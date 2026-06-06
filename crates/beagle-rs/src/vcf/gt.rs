@@ -1,8 +1,14 @@
 //! Port of `vcf/GT.java` — genotype data for a list of markers and samples.
 
+use std::rc::Rc;
+
 use super::{Marker, Markers, Samples};
 
 /// Port of the `vcf/GT.java` interface.
+///
+/// The `restrict` methods take `self: Rc<Self>` so wrapper implementations
+/// (`RestrictedGT`, `SplicedGT`, `XRefGT`) can return a view that shares the receiver,
+/// mirroring Java's `new RestrictedGT(this, ...)`.
 pub trait GT {
     /// `isReversed()` — markers in decreasing base-position order.
     fn is_reversed(&self) -> bool;
@@ -32,8 +38,8 @@ pub trait GT {
     fn allele(&self, marker: i32, hap: i32) -> i32;
 
     /// `restrict(Markers markers, int[] indices)`.
-    fn restrict(&self, markers: &Markers, indices: &[i32]) -> Box<dyn GT>;
+    fn restrict(self: Rc<Self>, markers: &Markers, indices: &[i32]) -> Rc<dyn GT>;
 
     /// `restrict(int start, int end)`.
-    fn restrict_range(&self, start: i32, end: i32) -> Box<dyn GT>;
+    fn restrict_range(self: Rc<Self>, start: i32, end: i32) -> Rc<dyn GT>;
 }

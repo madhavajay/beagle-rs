@@ -136,24 +136,24 @@ impl GT for BasicGT {
         self.recs[marker as usize].get(hap)
     }
 
-    fn restrict(&self, restricted_markers: &Markers, indices: &[i32]) -> Box<dyn GT> {
+    fn restrict(self: Rc<Self>, restricted_markers: &Markers, indices: &[i32]) -> Rc<dyn GT> {
         let restricted_recs: Vec<Rc<dyn GTRec>> = indices
             .iter()
             .map(|&j| self.recs[j as usize].clone())
             .collect();
-        Box::new(BasicGT::from_markers_samples(
+        Rc::new(BasicGT::from_markers_samples(
             restricted_markers.clone(),
             self.samples.clone(),
             restricted_recs,
         ))
     }
 
-    fn restrict_range(&self, start: i32, end: i32) -> Box<dyn GT> {
+    fn restrict_range(self: Rc<Self>, start: i32, end: i32) -> Rc<dyn GT> {
         let restrict_markers = self.markers.restrict(start, end);
         let restrict_recs: Vec<Rc<dyn GTRec>> = (start..end)
             .map(|j| self.recs[j as usize].clone())
             .collect();
-        Box::new(BasicGT::from_markers_samples(
+        Rc::new(BasicGT::from_markers_samples(
             restrict_markers,
             self.samples.clone(),
             restrict_recs,
@@ -238,8 +238,8 @@ mod tests {
             rec(&h, "chr1\t200\t.\tG\tT\t.\tPASS\t.\tGT\t1|0"),
             rec(&h, "chr1\t300\t.\tA\tG\t.\tPASS\t.\tGT\t0|0"),
         ];
-        let gt = BasicGT::new(recs);
-        let sub = gt.restrict_range(1, 3);
+        let gt = Rc::new(BasicGT::new(recs));
+        let sub = gt.clone().restrict_range(1, 3);
         assert_eq!(sub.n_markers(), 2);
         assert_eq!(sub.marker(0).pos(), 200);
         assert_eq!(sub.allele(0, 0), 1);
