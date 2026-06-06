@@ -3,6 +3,8 @@
 
 mod haplotype_coder;
 mod state_probs;
+mod state_probs_factory;
 
 pub use haplotype_coder::HaplotypeCoder;
 pub use state_probs::StateProbs;
+pub use state_probs_factory::{BasicStateProbs, StateProbsFactory};
