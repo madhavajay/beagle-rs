@@ -6,6 +6,7 @@
 
 mod allele_ref_gt_rec;
 mod basic_gt_rec;
+mod bit_array_gt_rec;
 mod bit_array_ref_gt_rec;
 mod genetic_map;
 mod gt;
@@ -32,6 +33,7 @@ mod vcf_writer;
 
 pub use allele_ref_gt_rec::AlleleRefGTRec;
 pub use basic_gt_rec::BasicGTRec;
+pub use bit_array_gt_rec::BitArrayGTRec;
 pub use bit_array_ref_gt_rec::BitArrayRefGTRec;
 pub use genetic_map::{
     gen_pos_markers, gen_pos_markers_min_dist, genetic_map_from_file, GeneticMap,
