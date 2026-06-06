@@ -1,0 +1,13 @@
+# marker parity (Beagle 5.5 27Feb25.75f)
+mode=full rec=0 chrom=chr1 pos=100 id=rs1 alleles=A/C nAlleles=2 nRefBases=1 qual=30 filter=PASS info=. end= hasId=true hasEnd=false bits=1 str=chr1/100/rs1/A/C
+mode=full rec=1 chrom=chr1 pos=200 id=. alleles=A/G,T nAlleles=3 nRefBases=1 qual=. filter=. info=AC=2;AN=4 end= hasId=false hasEnd=false bits=2 str=chr1/200/./A/G,T
+mode=full rec=2 chrom=chr1 pos=300 id=idDEL alleles=AC/A nAlleles=2 nRefBases=2 qual=. filter=q10 info=END=305;SVTYPE=DEL end=305 hasId=true hasEnd=true bits=1 str=chr1/300/idDEL/AC/A
+mode=full rec=3 chrom=chr1 pos=400 id=. alleles=A/. nAlleles=1 nRefBases=1 qual=. filter=. info=. end= hasId=false hasEnd=false bits=0 str=chr1/400/./A/.
+mode=full rec=4 chrom=chr2 pos=500 id=rs5 alleles=ACGT/A,ATTT nAlleles=3 nRefBases=4 qual=99 filter=PASS info=DP=10 end= hasId=true hasEnd=false bits=2 str=chr2/500/rs5/ACGT/A,ATTT
+mode=full rec=5 chrom=chr2 pos=600 id=. alleles=G/A,C,T nAlleles=4 nRefBases=1 qual=. filter=PASS info=. end= hasId=false hasEnd=false bits=2 str=chr2/600/./G/A,C,T
+mode=none rec=0 chrom=chr1 pos=100 id=. alleles=A/C nAlleles=2 nRefBases=1 qual=. filter=. info=. end= hasId=false hasEnd=false bits=1 str=chr1/100/./A/C
+mode=none rec=1 chrom=chr1 pos=200 id=. alleles=A/G,T nAlleles=3 nRefBases=1 qual=. filter=. info=. end= hasId=false hasEnd=false bits=2 str=chr1/200/./A/G,T
+mode=none rec=2 chrom=chr1 pos=300 id=. alleles=AC/A nAlleles=2 nRefBases=2 qual=. filter=. info=END=305 end=305 hasId=false hasEnd=true bits=1 str=chr1/300/./AC/A
+mode=none rec=3 chrom=chr1 pos=400 id=. alleles=A/. nAlleles=1 nRefBases=1 qual=. filter=. info=. end= hasId=false hasEnd=false bits=0 str=chr1/400/./A/.
+mode=none rec=4 chrom=chr2 pos=500 id=. alleles=ACGT/A,ATTT nAlleles=3 nRefBases=4 qual=. filter=. info=. end= hasId=false hasEnd=false bits=2 str=chr2/500/./ACGT/A,ATTT
+mode=none rec=5 chrom=chr2 pos=600 id=. alleles=G/A,C,T nAlleles=4 nRefBases=1 qual=. filter=. info=. end= hasId=false hasEnd=false bits=2 str=chr2/600/./G/A,C,T
