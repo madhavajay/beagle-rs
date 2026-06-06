@@ -19,3 +19,4 @@ pub mod beagleutil;
 pub mod blbutil;
 pub mod ints;
 pub mod jdk;
+pub mod vcf;
