@@ -1,11 +1,13 @@
 //! Port of the Java `main` package — program constants, the `Par` parameter set, and the
 //! top-level driver. (Named `main_pkg` because `main` is reserved for a binary entry point.)
 
+mod main_driver;
 mod par;
 mod pedigree;
 mod run_stats;
 mod window_writer;
 
+pub use main_driver::main;
 pub use par::{li_stephens_p_mismatch, Par};
 pub use pedigree::Pedigree;
 pub use run_stats::RunStats;
