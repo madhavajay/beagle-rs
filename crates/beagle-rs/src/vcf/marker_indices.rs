@@ -4,6 +4,7 @@
 use crate::ints::java_binary_search;
 
 /// Port of `vcf/MarkerIndices.java`.
+#[derive(Clone)]
 pub struct MarkerIndices {
     prev_splice: i32,
     overlap_end: i32,
