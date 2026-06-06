@@ -4,6 +4,7 @@
 //! unfiltered haplotypes, then `nRecs` records. Each record is a marker, a `byte` flag
 //! (0 = sequence-coded `HapRefGTRec`, 1 = allele-coded), and the coded genotype data.
 
+use std::collections::VecDeque;
 use std::io::{self, Read};
 use std::path::Path;
 use std::sync::OnceLock;
@@ -71,7 +72,11 @@ impl Bref3Reader {
 
     /// `readBlock(DataInput bref, Collection<RefGTRec> buffer)` — reads blocks until the
     /// buffer is non-empty or the end-of-data sentinel (`nRecs == 0`) is reached.
-    pub fn read_block<R: Read>(&mut self, di: &mut DataIn<R>, buffer: &mut Vec<Box<dyn RefGTRec>>) {
+    pub fn read_block<R: Read>(
+        &mut self,
+        di: &mut DataIn<R>,
+        buffer: &mut VecDeque<Box<dyn RefGTRec>>,
+    ) {
         if let Err(e) = self.read_block_impl(di, buffer) {
             Utilities::exit(&format!("{READ_ERR}: {e}"));
         }
@@ -80,7 +85,7 @@ impl Bref3Reader {
     fn read_block_impl<R: Read>(
         &mut self,
         di: &mut DataIn<R>,
-        buffer: &mut Vec<Box<dyn RefGTRec>>,
+        buffer: &mut VecDeque<Box<dyn RefGTRec>>,
     ) -> io::Result<()> {
         let mut n_recs = i32::MAX;
         while buffer.is_empty() && n_recs != 0 {
@@ -95,7 +100,7 @@ impl Bref3Reader {
     fn read_block_n<R: Read>(
         &mut self,
         di: &mut DataIn<R>,
-        buffer: &mut Vec<Box<dyn RefGTRec>>,
+        buffer: &mut VecDeque<Box<dyn RefGTRec>>,
         n_recs: i32,
     ) -> io::Result<()> {
         let chrom = di.read_utf()?;
@@ -112,7 +117,7 @@ impl Bref3Reader {
                 _ => Utilities::exit(READ_ERR),
             };
             if self.marker_filter.accept(rec.marker()) {
-                buffer.push(rec);
+                buffer.push_back(rec);
             }
         }
         Ok(())
