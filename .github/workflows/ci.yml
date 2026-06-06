@@ -25,6 +25,11 @@ jobs:
         run: cargo clippy --workspace --all-targets -- -D warnings
       - name: test
         run: cargo test --workspace
+      - name: parity (e2e byte-for-byte vs golden fixtures)
+        # Runs the actual beagle-rs/bref3/unbref3 binaries on fixtures/official/ and asserts
+        # byte-identity with the golden Java outputs. Release build (the gt= phasing run is
+        # slow in debug). Needs only the committed fixtures, not the Java submodule.
+        run: cargo test -p beagle-rs-cli --release --test parity_official -- --ignored
 
   # Parity gate: rebuild the Java reference from the submodule, regenerate the
   # cross-language fixtures, and fail if the committed fixtures have drifted.
