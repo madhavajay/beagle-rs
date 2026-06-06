@@ -8,11 +8,13 @@ mod bref3_header;
 mod bref3_it;
 mod bref3_reader;
 mod bref_block;
+mod seq_coder3;
 
 pub use bref3_header::Bref3Header;
 pub use bref3_it::Bref3It;
 pub use bref3_reader::Bref3Reader;
 pub use bref_block::BrefBlock;
+pub use seq_coder3::{default_max_n_seq, SeqCoder3, COMPRESS_FREQ_THRESHOLD, MAX_NALLELES};
 
 /// `AsIsBref3Writer.END_OF_DATA`.
 pub const END_OF_DATA: i32 = 0;
