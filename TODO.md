@@ -218,8 +218,10 @@ until they pass, then add the parity check. File counts in parens.
       - [ ] `SampleFileIt`, `VcfFileIt` → with `vcf` (reference `vcf::Samples`/`VcfHeader`).
       - [ ] `MultiThreadUtils` → with `phase`/`imp` (threading; `nthreads=1` parity first).
       - [ ] `TriFunction` → Rust closures at call sites.
-- [ ] `beagleutil` (8) — `ChromIds`, `SampleIds`, `ThreadSafeIndexer`, PBWT updaters (`PbwtUpdater`,
-      `PbwtDivUpdater`), intervals.
+- [x] `beagleutil` (8) ✅ — `ThreadSafeIndexer`, `ChromIds`/`SampleIds` (OnceLock singletons),
+      `IntInterval`, `ChromInterval` (+ parse/overlap/merge), `CompHapSegment`, `PbwtUpdater`,
+      `PbwtDivUpdater`. 16 tests; PBWT verified vs hand-traced output. (Deferred to `vcf`:
+      `ChromInterval`'s `Marker`-based ctor + `contains(Marker)`.)
 - [ ] `vcf` (38) — VCF/genotype model + IO: `GT`, `Marker(s)`, `VcfRec`, `VcfRecGTParser`, `RefGT*`,
       sliding windows, `PlinkGenMap`, `MarkerMap`. Largest IO surface; many record encodings.
 - [ ] `bref` (10) — bref3 binary format read/write (`Bref3*`, `SeqCoder3`, `AsIs/CompressBref3Writer`,

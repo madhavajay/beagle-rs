@@ -23,3 +23,9 @@ Default stance: **preserve** (byte-for-byte parity is the goal).
 |----|----------|----------|----------|
 | blb-1 | `BitArray.getAsInt(index)` | For `index % 64 == 63`, a set bit yields `-1` (the sign bit propagates through the arithmetic `>>`), not `1`. | preserve |
 | blb-2 | `BGZIPOutputStream.write(byte[] buf, int off, int len)` | The loop guard `(len - off) >= availSize` and trailing copy of `len` bytes are only correct for `off == 0` with `len` smaller than the block size. Larger or offset writes under-flush and then overflow the fixed `input[]` buffer (`ArrayIndexOutOfBoundsException`). Beagle only ever drives it via small `off==0` writes, so the bug is latent. The Rust port uses correct buffering that flushes at exactly `MAX_INPUT_BYTES`, producing identical block boundaries for all realistic call patterns. | port-correct (latent bug not reproduced; document) |
+
+## `beagleutil` package
+
+| ID | Location | Behavior | Decision |
+|----|----------|----------|----------|
+| beagleutil-1 | `ChromInterval.isValidPos` | The leading-zero guard `s.charAt(startIndex) == 0` compares to the NUL char (int `0`), not `'0'`, so it never fires — leading zeros in positions are accepted. Preserved. | preserve |
