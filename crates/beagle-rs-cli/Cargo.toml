@@ -10,5 +10,13 @@ description = "Command-line front-end for beagle-rs (drop-in replacement for bea
 name = "beagle-rs"
 path = "src/main.rs"
 
+[[bin]]
+name = "bref3"
+path = "src/bin/bref3.rs"
+
+[[bin]]
+name = "unbref3"
+path = "src/bin/unbref3.rs"
+
 [dependencies]
 beagle-rs = { workspace = true }

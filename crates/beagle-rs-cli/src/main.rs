@@ -1,14 +1,10 @@
-//! Command-line front-end for `beagle-rs`.
+//! `beagle-rs` — the Beagle phasing/imputation program (drop-in replacement for
+//! `java -jar beagle.27Feb25.75f.jar`).
 //!
-//! Placeholder during the port: the CLI argument surface (`main/Par.java`) and the
-//! phasing/imputation pipeline are ported in later phases. This binary currently
-//! only reports build/version info so the workspace has a runnable target.
+//! Mirrors `main/Main.java`: command-line arguments (excluding the program name) are forwarded
+//! verbatim to the ported driver, which parses them with `Par` and runs the pipeline.
 
 fn main() {
-    eprintln!(
-        "beagle-rs {} — Rust port of Beagle 5.5 (27Feb25.75f), in progress.",
-        env!("CARGO_PKG_VERSION")
-    );
-    eprintln!("The CLI pipeline is not yet ported; see TODO.md for status.");
-    std::process::exit(1);
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    beagle_rs::main_pkg::main(&args);
 }
