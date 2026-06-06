@@ -29,3 +29,10 @@ Default stance: **preserve** (byte-for-byte parity is the goal).
 | ID | Location | Behavior | Decision |
 |----|----------|----------|----------|
 | beagleutil-1 | `ChromInterval.isValidPos` | The leading-zero guard `s.charAt(startIndex) == 0` compares to the NUL char (int `0`), not `'0'`, so it never fires — leading zeros in positions are accepted. Preserved. | preserve |
+
+## `vcf` package
+
+| ID | Location | Behavior | Decision |
+|----|----------|----------|----------|
+| vcf-1 | `AlleleRefGTRec.deepCopy(int[][])` | Builds `copy` but `return ia` (the input), so it is a shallow share, not a deep copy. No observable effect because the record is immutable. The Rust port clones (equivalent for immutable data). | preserve-effect |
+| vcf-2 | `LowMafGTRec.alleleCount(majorAllele)` | Subtracts `hapIndices.length` (the allele *count*) once per non-major allele instead of that row's length (`hapIndices[al].length`), so the returned major-allele count is generally wrong. Preserved. | preserve |
