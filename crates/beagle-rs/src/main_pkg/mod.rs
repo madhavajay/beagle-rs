@@ -2,8 +2,10 @@
 //! top-level driver. (Named `main_pkg` because `main` is reserved for a binary entry point.)
 
 mod par;
+mod pedigree;
 
 pub use par::{li_stephens_p_mismatch, Par};
+pub use pedigree::Pedigree;
 
 /// `Main.VERSION`.
 pub const VERSION: &str = "(version 5.5)";
