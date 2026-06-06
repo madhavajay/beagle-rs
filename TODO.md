@@ -136,22 +136,26 @@ Distilled conventions to adopt here:
 
 ---
 
-## Phase 0 — Repo & harness setup
+## Phase 0 — Repo & harness setup  ✅ DONE (2026-06-06)
 Toolchain present (2026-06-06): **Java 26** (`javac` 26 — compiles the Java 8 source fine), **Rust 1.95**,
 `curl` (no `wget`), **no** `mvn`/`gradle`/`ant`, **no** `bgzip`/`tabix` (Beagle ships its own BGZIP — not needed).
-- [ ] Add `README.md` (what this is, how to fetch the Java reference, how to run tests).
-- [ ] Add `scripts/fetch-reference.sh` — `curl` down `beagle.*.jar`, `bref3.*.jar`, `unbref3.*.jar`,
-      run example + test data into `reference/` (git-ignored, checksummed). Pin exact filenames/versions.
-- [ ] Add `scripts/build-java.sh` — compile `beagle/**.java` to a local jar with **plain `javac`**
-      (no build tool installed); confirm it reproduces the published jar's behavior.
-- [ ] Preflight check: hard-error if `java`/`javac` is missing — *don't* let the harness silently skip
-      (samtools-rs lesson).
+- [x] `README.md` — project overview, layout, build/test instructions.
+- [x] `scripts/fetch-reference.sh` — `curl` down `beagle/bref3/unbref3` jars + example + test data into
+      `reference/` (git-ignored), with `SHA256SUMS`.
+- [x] `scripts/build-java.sh` — compiles `beagle/**.java` to `reference/beagle.local.jar` with plain `javac`.
+- [x] Preflight checks: both scripts hard-error if `javac`/`curl` missing (samtools-rs lesson).
 
-## Phase 1 — Build & run the Java reference
-- [ ] Compile `beagle/` source to a local `beagle.jar` (confirm it matches the published jar's behavior).
-- [ ] Run all four example commands above; capture outputs as the first golden fixtures.
-- [ ] Document determinism knobs — set `seed=` explicitly and `nthreads=1` for every reference run so
-      outputs are reproducible (see [gotchas](#known-gotchas--risks)).
+## Phase 1 — Build & run the Java reference  ✅ DONE (2026-06-06)
+- [x] Compiled `beagle/` (135 files → 148 classes, 0 errors) to `reference/beagle.local.jar`.
+- [x] **Verified the local build is byte-for-byte identical to the official jar** across all three modes
+      (`gt=` phasing, `ref=` VCF imputation, bref3 imputation) — confirms imported source = the exact 5.5
+      release. Local `bref3` tool also produces a **byte-identical `.bref3`** (62481 B) vs the official tool.
+- [x] **Determinism confirmed:** with `nthreads=1 seed=99999`, output is identical across repeated runs →
+      byte-for-byte parity testing is achievable. (Default `seed=99999`; default `nthreads`=cores.)
+- [x] Characterized `unbref3` round-trip: bref3 deliberately drops VCF header metadata/INFO and regenerates
+      a canonical minimal header (`VCFv4.2` + fresh `filedate`); haplotype/genotype data is lossless. The
+      Rust `unbref3` must reproduce this canonicalization, not the original header.
+- Note: default multi-thread runs not yet checked for determinism — port targets `nthreads=1` first.
 
 ## Phase 2 — Test data acquisition
 - [ ] Vendor the official tiny example data (`test/ref/target` + `ref.bref3`) under `fixtures/official/`.
