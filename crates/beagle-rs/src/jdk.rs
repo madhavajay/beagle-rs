@@ -2,6 +2,8 @@
 //! directly (not part of any Beagle package). Determinism of the port depends on
 //! these matching the JDK bit-for-bit.
 
+use std::cmp::Ordering;
+
 /// Port of `java.util.Random` — the 48-bit linear congruential generator. Beagle
 /// seeds it deterministically from `seed=`, so reproducing it exactly is required for
 /// byte-for-byte phasing/imputation parity.
@@ -79,6 +81,107 @@ impl Random {
     }
 }
 
+/// Port of `java.util.PriorityQueue` — an array-backed binary min-heap ordered by `Ord`
+/// (mirroring elements' `compareTo`). The exact `siftUp`/`siftDown` element movement is
+/// reproduced so that ties (elements that compare `Equal`) are broken identically to the JDK,
+/// which Beagle's composite-haplotype construction depends on for byte-for-byte output.
+///
+/// Only the operations Beagle uses are provided: `offer`/`add`, `poll`, `peek`, `clear`,
+/// `size`, `is_empty`. (`remove(Object)`/`contains` are unused and omitted.)
+pub struct PriorityQueue<T: Ord> {
+    queue: Vec<T>,
+}
+
+impl<T: Ord> PriorityQueue<T> {
+    /// `new PriorityQueue(int initialCapacity)`.
+    pub fn new(initial_capacity: usize) -> Self {
+        PriorityQueue {
+            queue: Vec::with_capacity(initial_capacity),
+        }
+    }
+
+    /// `size()`.
+    pub fn size(&self) -> i32 {
+        self.queue.len() as i32
+    }
+
+    /// `isEmpty()`.
+    pub fn is_empty(&self) -> bool {
+        self.queue.is_empty()
+    }
+
+    /// `clear()`.
+    pub fn clear(&mut self) {
+        self.queue.clear();
+    }
+
+    /// `peek()` — the least element, or `None` if empty.
+    pub fn peek(&self) -> Option<&T> {
+        self.queue.first()
+    }
+
+    /// `offer(E e)` / `add(E e)` — insert, then `siftUp`.
+    pub fn offer(&mut self, e: T) {
+        let i = self.queue.len();
+        self.queue.push(e);
+        if i != 0 {
+            self.sift_up(i);
+        }
+    }
+
+    /// `add(E e)`.
+    pub fn add(&mut self, e: T) {
+        self.offer(e);
+    }
+
+    /// `poll()` — remove and return the least element, or `None` if empty.
+    pub fn poll(&mut self) -> Option<T> {
+        let n = self.queue.len();
+        if n == 0 {
+            return None;
+        }
+        // swap_remove moves the last element to index 0 (Java's `x = queue[--size]`);
+        // siftDown unless that emptied the heap (Java's `if (s != 0)`).
+        let result = self.queue.swap_remove(0);
+        if !self.queue.is_empty() {
+            self.sift_down(0);
+        }
+        Some(result)
+    }
+
+    /// `siftUp(int k, E x)` (comparable form): bubble element at `k` toward the root while it
+    /// is strictly less than its parent.
+    fn sift_up(&mut self, mut k: usize) {
+        while k > 0 {
+            let parent = (k - 1) >> 1;
+            if self.queue[k].cmp(&self.queue[parent]) != Ordering::Less {
+                break;
+            }
+            self.queue.swap(k, parent);
+            k = parent;
+        }
+    }
+
+    /// `siftDown(int k, E x)` (comparable form): push element at `k` toward the leaves,
+    /// preferring the smaller child and the left child on ties (`compareTo > 0` selects right).
+    fn sift_down(&mut self, mut k: usize) {
+        let n = self.queue.len();
+        let half = n >> 1;
+        while k < half {
+            let mut child = (k << 1) + 1;
+            let right = child + 1;
+            if right < n && self.queue[child].cmp(&self.queue[right]) == Ordering::Greater {
+                child = right;
+            }
+            if self.queue[k].cmp(&self.queue[child]) != Ordering::Greater {
+                break;
+            }
+            self.queue.swap(k, child);
+            k = child;
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -113,5 +216,35 @@ mod tests {
             let d = r.next_double();
             assert!((0.0..1.0).contains(&d));
         }
+    }
+
+    #[test]
+    fn priority_queue_polls_in_ascending_order() {
+        let mut pq = PriorityQueue::new(4);
+        for v in [5, 1, 3, 8, 2, 7, 4, 6, 0, 9] {
+            pq.offer(v);
+        }
+        assert_eq!(pq.size(), 10);
+        assert_eq!(pq.peek().copied(), Some(0));
+        let mut out = Vec::new();
+        while let Some(v) = pq.poll() {
+            out.push(v);
+        }
+        assert_eq!(out, vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        assert!(pq.is_empty());
+    }
+
+    #[test]
+    fn priority_queue_internal_array_matches_jdk() {
+        // Heap array layout verified against java.util.PriorityQueue<Integer>.
+        // Offering 3,1,4,1,5,9,2,6 yields internal array [1,1,2,3,5,9,4,6].
+        let mut pq = PriorityQueue::new(8);
+        for v in [3, 1, 4, 1, 5, 9, 2, 6] {
+            pq.offer(v);
+        }
+        assert_eq!(pq.queue, vec![1, 1, 2, 3, 5, 9, 4, 6]);
+        // After one poll the JDK array is [1,3,2,6,5,9,4].
+        assert_eq!(pq.poll(), Some(1));
+        assert_eq!(pq.queue, vec![1, 3, 2, 6, 5, 9, 4]);
     }
 }
