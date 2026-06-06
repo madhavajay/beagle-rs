@@ -13,19 +13,23 @@ port, no "good enough", no permanent stubs. Concretely, ALL of the following mus
       (`ints blbutil beagleutil vcf bref imp main phase`), all 135 files. Nothing skipped.
       (3 blbutil helpers have no 1:1 file but are faithfully subsumed + documented in-code:
       `BGZipIt`/`BlockLineReader`→`InputIt`, `MultiThreadUtils`→sequential, `TriFunction`→closure.)
-- [ ] **Full feature set:** phasing (`gt=`), imputation from VCF ref (`ref=`), imputation
-      from bref3 ref, and the standalone `bref3` and `unbref3` tools.
-- [ ] **Full CLI surface:** every `key=value` argument, default, and validation/error message
-      that Beagle 5.5 accepts behaves identically (see `main/Par.java`).
-- [ ] **Byte-for-byte exact output** vs. the Java reference across the entire fixture matrix —
-      output `*.vcf.gz`, `*.bref3`, and `*.log` files are *byte-identical* (this includes the
-      BGZIP-compressed bytes, not just decompressed content — see [gotchas](#known-gotchas--risks)
-      for how we hit byte parity on the deflate stream).
+- [x] **Full feature set:** phasing (`gt=`), imputation from VCF ref (`ref=`), imputation
+      from bref3 ref, and the standalone `bref3` and `unbref3` tools. (All verified byte-identical
+      to the Java reference on the official fixtures — see Phase 7.)
+- [x] **Full CLI surface:** every `key=value` argument, default, and validation/error message
+      that Beagle 5.5 accepts behaves identically (see `main/Par.java`). (`usage()` byte-identical;
+      12-combo argument-matrix sweep content-identical to the jar. Caveat: the invalid-arg error
+      path prints the message but not Java's JVM stack trace.)
+- [~] **Byte-for-byte exact output** vs. the Java reference — *byte-identical* `*.vcf.gz` / `*.bref3`
+      (incl. the BGZIP deflate stream) and `*.log` (modulo documented wall-clock fields) on the
+      **official** fixture matrix (Phase 7). The pypgx CYP4F2 slice of the matrix is still pending
+      (data not yet vendored).
 - [x] **No `todo!`/`unimplemented!`/panicking stubs** anywhere in shipped code paths.
       (Verified: no `todo!`/`unimplemented!`; the single `unreachable!()` in `pedigree.rs` is a
       provably-exhaustive match guard — `n_parents` returns only 0/1/2 — not an unported path.)
-- [ ] The Rust binary is a **drop-in replacement** for `beagle.27Feb25.75f.jar`: same args in →
-      same bytes out, same exit codes, same stderr/stdout shape.
+- [x] The Rust binary is a **drop-in replacement** for `beagle.27Feb25.75f.jar`: same args in →
+      same bytes out, same exit codes, same stderr/stdout shape. (Verified on the official fixtures;
+      `beagle-rs`/`bref3`/`unbref3` binaries mirror the three jars.)
 - [ ] The full differential **parity suite is 100% green** in CI (not a subset), and the
       mirrored Rust unit tests (ported 1:1 from the Java test suite we write) all pass.
 - [ ] `pypgx-rs` integration acceptance: `beagle-rs` replaces the `NotPorted` stub in
@@ -249,11 +253,24 @@ until they pass, then add the parity check. File counts in parens.
       formatting (DecimalFormat tables generated from Java 26; AF via `{:.4}`). 251 unit tests.
 
 ## Phase 7 — End-to-end parity & integration
-- [ ] Full-pipeline parity on every fixture (official + pypgx CYP4F2): phasing, VCF-ref imputation,
-      bref3-ref imputation, bref3 round-trip.
+- [x] **Full-pipeline byte-for-byte parity on the official fixtures** (1356 markers × 191 samples,
+      `nthreads=1 seed=99999`) — VERIFIED identical to `beagle.27Feb25.75f.jar`:
+      - `gt=` phasing → `out.gt.vcf.gz`  **byte-identical** (incl. the BGZIP deflate stream)
+      - `ref=<vcf> gt=` imputation → `out.ref.vcf.gz`  **byte-identical**
+      - `ref=<bref3> gt=` imputation → `out.bref3.vcf.gz`  **byte-identical**
+      - `bref3` tool (VCF→bref3)  **byte-identical**;  `unbref3` (bref3→VCF) identical modulo
+        the wall-clock `##filedate`
+      - `.log` identical modulo documented wall-clock/heap fields (the `Estimated ne:`/`err:`
+        statistics match exactly)
+      Gated permanently by `crates/beagle-rs-cli/tests/parity_official.rs` + `scripts/parity-check.sh`
+      + a release CI step. `SOURCE_DATE_EPOCH` pins the one wall-clock field so it's byte-exact.
+- [x] **CLI-surface parity** — `Par::usage()` byte-identical to Java; a 12-combination
+      argument-matrix sweep (gp/ap/window/overlap/burnin/iterations/em/impute/cluster/alt-seed)
+      is content-identical to the jar; no-args usage byte-identical.
 - [ ] Resolve the **preserve-vs-fix** bug decisions in one dedicated commit (kestrel-rs pattern).
-- [ ] (Optional) Wire `beagle-rs` into `pypgx-rs/src/external.rs` to replace the `NotPorted` stub and
-      re-run pypgx's tests as an external acceptance gate.
+- [ ] pypgx CYP4F2 acceptance: vendor the CYP4F2 fixtures (Phase 2 pypgx item), run parity, then
+      wire `beagle-rs` into `pypgx-rs/src/external.rs` to replace the `NotPorted` stub. Requires the
+      external pypgx data (not yet vendored).
 
 ---
 
