@@ -26,7 +26,9 @@ mod two_allele_ref_gt_rec;
 mod vcf_header;
 mod vcf_meta_info;
 mod vcf_rec;
+mod vcf_rec_builder;
 mod vcf_rec_gt_parser;
+mod vcf_writer;
 
 pub use allele_ref_gt_rec::AlleleRefGTRec;
 pub use basic_gt_rec::BasicGTRec;
@@ -51,4 +53,9 @@ pub use two_allele_ref_gt_rec::TwoAlleleRefGTRec;
 pub use vcf_header::{VcfHeader, HEADER_PREFIX};
 pub use vcf_meta_info::VcfMetaInfo;
 pub use vcf_rec::{gt_index, VcfRec};
+pub use vcf_rec_builder::VcfRecBuilder;
 pub use vcf_rec_gt_parser::{HapListRep, VcfRecGTParser};
+pub use vcf_writer::{
+    append_records_gt, append_records_recs, print_fixed_fields_gt, write_meta_lines,
+    write_meta_lines_gt,
+};
