@@ -2,6 +2,7 @@
 //! HMM forward/backward, and parameter estimation). Ported bottom-up from leaf types.
 
 mod hmm_updater;
+mod ibs2;
 mod ibs2_markers;
 mod ibs2_sets;
 mod param_estimates;
@@ -10,6 +11,7 @@ mod sample_seg;
 mod swap_rate;
 
 pub use hmm_updater::HmmUpdater;
+pub use ibs2::Ibs2;
 pub use ibs2_markers::Ibs2Markers;
 pub use ibs2_sets::Ibs2Sets;
 pub use param_estimates::ParamEstimates;
