@@ -96,6 +96,21 @@ pub(crate) fn chrom_index(vcf_rec: &str, chrom: &str) -> i16 {
     chr_index as i16
 }
 
+/// `appendFirst7Fields(Marker, StringBuilder)` — CHROM..FILTER, no trailing tab.
+pub fn append_first_7_fields(marker: &Marker, sb: &mut String) {
+    sb.push_str(&marker.chrom());
+    sb.push(consts::TAB);
+    sb.push_str(&marker.pos().to_string());
+    sb.push(consts::TAB);
+    sb.push_str(&marker.id());
+    sb.push(consts::TAB);
+    sb.push_str(&marker.alleles());
+    sb.push(consts::TAB);
+    sb.push_str(&marker.qual());
+    sb.push(consts::TAB);
+    sb.push_str(&marker.filter());
+}
+
 /// `coordinate(Marker)` — `chrom:pos`.
 pub fn coordinate(marker: &Marker) -> String {
     format!("{}{}{}", marker.chrom(), consts::COLON, marker.pos())
