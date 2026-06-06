@@ -8,9 +8,11 @@ mod gt_rec;
 mod marker;
 mod marker_parser;
 pub mod marker_utils;
+mod markers;
 mod samples;
 
 pub use gt_rec::{allele_counts, allele_freq, to_vcf_rec, GTRec};
 pub use marker::Marker;
 pub use marker_parser::MarkerParser;
+pub use markers::Markers;
 pub use samples::Samples;
