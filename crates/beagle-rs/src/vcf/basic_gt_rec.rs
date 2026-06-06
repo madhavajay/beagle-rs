@@ -6,7 +6,7 @@
 
 use crate::ints::IntArray;
 
-use super::{to_vcf_rec, GTRec, Marker, Samples};
+use super::{to_vcf_rec, GTRec, Marker, Samples, VcfRecGTParser};
 
 /// Port of `vcf/BasicGTRec.java`.
 pub struct BasicGTRec {
@@ -32,6 +32,21 @@ impl BasicGTRec {
         BasicGTRec {
             marker,
             samples,
+            alleles,
+            is_phased,
+            all_phased,
+        }
+    }
+
+    /// `new BasicGTRec(VcfRecGTParser recParser)`.
+    pub fn from_parser(rec_parser: &VcfRecGTParser) -> Self {
+        let n_samples = rec_parser.samples().size();
+        let mut alleles = vec![0i32; (n_samples << 1) as usize];
+        let mut is_phased = vec![false; n_samples as usize];
+        let all_phased = rec_parser.store_alleles_int(&mut alleles, &mut is_phased);
+        BasicGTRec {
+            marker: rec_parser.marker().clone(),
+            samples: rec_parser.samples().clone(),
             alleles,
             is_phased,
             all_phased,

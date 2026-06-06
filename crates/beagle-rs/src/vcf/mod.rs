@@ -22,6 +22,7 @@ mod samples;
 mod two_allele_ref_gt_rec;
 mod vcf_header;
 mod vcf_meta_info;
+mod vcf_rec;
 mod vcf_rec_gt_parser;
 
 pub use allele_ref_gt_rec::AlleleRefGTRec;
@@ -41,4 +42,5 @@ pub use samples::Samples;
 pub use two_allele_ref_gt_rec::TwoAlleleRefGTRec;
 pub use vcf_header::{VcfHeader, HEADER_PREFIX};
 pub use vcf_meta_info::VcfMetaInfo;
+pub use vcf_rec::{gt_index, VcfRec};
 pub use vcf_rec_gt_parser::{HapListRep, VcfRecGTParser};
