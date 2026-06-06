@@ -3,10 +3,12 @@
 //! Ported so far: `Const` (constants), `FloatArray`, `DoubleArray`, `FloatList`,
 //! `BitArray`, `StringUtil`. Remaining (IO/BGZIP/validation) land in later chunks.
 
+mod bgzip;
 mod bit_array;
 mod float_arrays;
 mod string_util;
 
+pub use bgzip::{write_empty_block, BgzipOutputStream, MAX_INPUT_BYTES};
 pub use bit_array::BitArray;
 pub use float_arrays::{DoubleArray, FloatArray, FloatList};
 pub use string_util::StringUtil;

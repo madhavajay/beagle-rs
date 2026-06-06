@@ -16,3 +16,10 @@ Default stance: **preserve** (byte-for-byte parity is the goal).
 | ints-5 | `IntList.get/set(index)` | Only checks `index >= size`, not `index < 0` (negative index → array-index exception instead of the documented `IndexOutOfBoundsException` path). | preserve |
 | ints-6 | `PackedIntArray.fromByteArray(ba, from, to, ...)` | Array slot index uses absolute `j` (`ia[j >> indexShift]`) while the bit offset uses relative `offset` (`(offset & valuesPerIntM1)`). Inconsistent when `from != 0`. Only called with `from == 0` in-tree. | preserve |
 | ints-7 | `IntIntMap(capacity)` | Code rejects `capacity < 1` (so `0` throws), though javadoc says `capacity < 0`. | preserve |
+
+## `blbutil` package
+
+| ID | Location | Behavior | Decision |
+|----|----------|----------|----------|
+| blb-1 | `BitArray.getAsInt(index)` | For `index % 64 == 63`, a set bit yields `-1` (the sign bit propagates through the arithmetic `>>`), not `1`. | preserve |
+| blb-2 | `BGZIPOutputStream.write(byte[] buf, int off, int len)` | The loop guard `(len - off) >= availSize` and trailing copy of `len` bytes are only correct for `off == 0` with `len` smaller than the block size. Larger or offset writes under-flush and then overflow the fixed `input[]` buffer (`ArrayIndexOutOfBoundsException`). Beagle only ever drives it via small `off==0` writes, so the bug is latent. The Rust port uses correct buffering that flushes at exactly `MAX_INPUT_BYTES`, producing identical block boundaries for all realistic call patterns. | port-correct (latent bug not reproduced; document) |

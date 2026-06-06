@@ -11,5 +11,6 @@ name = "beagle_rs"
 path = "src/lib.rs"
 
 [dependencies]
+flate2 = { workspace = true }
 
 [dev-dependencies]

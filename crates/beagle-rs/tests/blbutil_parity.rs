@@ -27,7 +27,10 @@ fn transcript() -> String {
             b.set(j);
         }
     }
-    out.push_str(&format!("bitarray words={}\n", longs_to_string(&b.to_long_array())));
+    out.push_str(&format!(
+        "bitarray words={}\n",
+        longs_to_string(&b.to_long_array())
+    ));
     out.push_str(&format!(
         "bitarray getAsInt[0,7,63,64,193]={},{},{},{},{}\n",
         b.get_as_int(0),
