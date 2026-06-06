@@ -20,6 +20,8 @@ mod markers;
 mod ref_gt_rec;
 mod samples;
 mod two_allele_ref_gt_rec;
+mod vcf_header;
+mod vcf_meta_info;
 
 pub use allele_ref_gt_rec::AlleleRefGTRec;
 pub use basic_gt_rec::BasicGTRec;
@@ -36,3 +38,5 @@ pub use markers::Markers;
 pub use ref_gt_rec::{allele_ref_gt_rec_from_components, allele_ref_gt_rec_from_rec, RefGTRec};
 pub use samples::Samples;
 pub use two_allele_ref_gt_rec::TwoAlleleRefGTRec;
+pub use vcf_header::{VcfHeader, HEADER_PREFIX};
+pub use vcf_meta_info::VcfMetaInfo;

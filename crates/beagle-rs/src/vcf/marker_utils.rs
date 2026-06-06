@@ -78,6 +78,19 @@ pub(crate) fn first_8_tab_indices(vcf_rec: &str) -> Vec<i32> {
     indices
 }
 
+/// `VcfRecGTParser.ninthTabPos(vcfRec)` — byte index of the 9th tab (end of FORMAT).
+pub(crate) fn ninth_tab_pos(vcf_rec: &str) -> i32 {
+    let bytes = vcf_rec.as_bytes();
+    let mut pos: i32 = -1;
+    for _ in 0..9 {
+        match bytes[(pos + 1) as usize..].iter().position(|&b| b == b'\t') {
+            Some(off) => pos = (pos + 1) + off as i32,
+            None => panic!("VCF record format error: {vcf_rec}"),
+        }
+    }
+    pos
+}
+
 /// `chromIndex(String vcfRec, String chrom)` — validates and indexes the CHROM field.
 pub(crate) fn chrom_index(vcf_rec: &str, chrom: &str) -> i16 {
     if chrom.is_empty() || chrom == "." {
