@@ -9,8 +9,10 @@ Java to Rust.
 This goal is **not complete** until the entire program is ported and verified. No partial
 port, no "good enough", no permanent stubs. Concretely, ALL of the following must hold:
 
-- [ ] **Every** Java source file's behavior is reproduced in Rust — all 8 packages
+- [x] **Every** Java source file's behavior is reproduced in Rust — all 8 packages
       (`ints blbutil beagleutil vcf bref imp main phase`), all 135 files. Nothing skipped.
+      (3 blbutil helpers have no 1:1 file but are faithfully subsumed + documented in-code:
+      `BGZipIt`/`BlockLineReader`→`InputIt`, `MultiThreadUtils`→sequential, `TriFunction`→closure.)
 - [ ] **Full feature set:** phasing (`gt=`), imputation from VCF ref (`ref=`), imputation
       from bref3 ref, and the standalone `bref3` and `unbref3` tools.
 - [ ] **Full CLI surface:** every `key=value` argument, default, and validation/error message
@@ -19,7 +21,9 @@ port, no "good enough", no permanent stubs. Concretely, ALL of the following mus
       output `*.vcf.gz`, `*.bref3`, and `*.log` files are *byte-identical* (this includes the
       BGZIP-compressed bytes, not just decompressed content — see [gotchas](#known-gotchas--risks)
       for how we hit byte parity on the deflate stream).
-- [ ] **No `todo!`/`unimplemented!`/panicking stubs** anywhere in shipped code paths.
+- [x] **No `todo!`/`unimplemented!`/panicking stubs** anywhere in shipped code paths.
+      (Verified: no `todo!`/`unimplemented!`; the single `unreachable!()` in `pedigree.rs` is a
+      provably-exhaustive match guard — `n_parents` returns only 0/1/2 — not an unported path.)
 - [ ] The Rust binary is a **drop-in replacement** for `beagle.27Feb25.75f.jar`: same args in →
       same bytes out, same exit codes, same stderr/stdout shape.
 - [ ] The full differential **parity suite is 100% green** in CI (not a subset), and the
@@ -208,28 +212,30 @@ until they pass, then add the parity check. File counts in parens.
 - [x] `ints` (9) ✅ — `IntArray` trait + `IntList`, `SynchedIntList`, `PackedIntArray`, `UnsignedByteArray`,
       `CharArray`, `WrappedIntArray`, `IndexArray`, `IntIntMap` + factories/statics. 32 unit tests +
       cross-language parity (byte-exact packing + map ordering). 7 quirks preserved (see `docs/known-quirks.md`).
-- [~] `blbutil` (22) — foundation done; remainder sequenced with consumers (not skipped):
+- [x] `blbutil` (20) ✅ — fully ported:
       - [x] `Const`, `FloatArray`, `DoubleArray`, `FloatList`, `BitArray`, `StringUtil`,
             `BGZIPOutputStream` (byte-exact), `Filter`, `Utilities`, `FileIt`, `InputIt`
             (+ `jdk::Random` — faithful `java.util.Random`, ported here as the determinism base).
-      - [x] subsumed: `BGZipIt`, `BlockLineReader` (parallel readers; identical line output via `InputIt`).
-      - [ ] `Validate` → port with `main/Par` (its arg-validation backend).
-      - [ ] `FileUtil` writer side (`bgzipPrintWriter` chain) + RAF/reader helpers → with `vcf`/`bref`.
-      - [ ] `SampleFileIt`, `VcfFileIt` → with `vcf` (reference `vcf::Samples`/`VcfHeader`).
-      - [ ] `MultiThreadUtils` → with `phase`/`imp` (threading; `nthreads=1` parity first).
-      - [ ] `TriFunction` → Rust closures at call sites.
+      - [x] `Validate` (`validate` module — arg-validation backend for `main/Par`).
+      - [x] `FileUtil` writer side (`printWriter`/`stdOutPrintWriter`/`bgzipPrintWriter`/`bufferedOutputStream`).
+      - [x] `SampleFileIt`, `VcfFileIt` (`sample_file_it.rs`).
+      - [x] `Utilities` IO helpers (`duoPrint`/`duoPrintln`/`timeStamp`/`commandLine`/`elapsedNanos`).
+      - [x] subsumed (no 1:1 file, documented in-code): `BGZipIt`/`BlockLineReader` → `InputIt`
+            (`MultiGzDecoder` reads BGZF blocks; identical line output); `MultiThreadUtils` → elided
+            (sequential, order-preserving; `nthreads=1` parity — see memory phasels-nthreads-parity);
+            `TriFunction` → a Rust closure type in `vcf/vcf_it.rs`.
 - [x] `beagleutil` (8) ✅ — `ThreadSafeIndexer`, `ChromIds`/`SampleIds` (OnceLock singletons),
       `IntInterval`, `ChromInterval` (+ parse/overlap/merge), `CompHapSegment`, `PbwtUpdater`,
       `PbwtDivUpdater`. 16 tests; PBWT verified vs hand-traced output. (Deferred to `vcf`:
       `ChromInterval`'s `Marker`-based ctor + `contains(Marker)`.)
-- [ ] `vcf` (38) — VCF/genotype model + IO: `GT`, `Marker(s)`, `VcfRec`, `VcfRecGTParser`, `RefGT*`,
+- [x] `vcf` (38) ✅ — VCF/genotype model + IO: `GT`, `Marker(s)`, `VcfRec`, `VcfRecGTParser`, `RefGT*`,
       sliding windows, `PlinkGenMap`, `MarkerMap`. Largest IO surface; many record encodings.
-- [ ] `bref` (10) — bref3 binary format read/write (`Bref3*`, `SeqCoder3`, `AsIs/CompressBref3Writer`,
-      `UnBref3`). **Byte-exact** target.
-- [~] `main` (5) — `Par` ✅ + `Pedigree` ✅ done; `RunStats`, `WindowWriter`, `Main` remain
-      (the top-level driver wiring phase + imp + IO; needs the deferred `blbutil` writer
-      helpers — `FileUtil.bgzipPrintWriter`/`stdOutPrintWriter`, `MultiThreadUtils` — and
-      `Utilities.duoPrint`/`timeStamp`/`commandLine`/`elapsedNanos`). Match arg names/defaults.
+- [x] `bref` (10) ✅ — bref3 binary format read/write (`Bref3*`, `SeqCoder3`, `AsIs/CompressBref3Writer`,
+      `UnBref3`). **Byte-exact** target; `bref3`→`unbref3` round-trip verified via the CLI binaries.
+- [x] `main` (5) ✅ — `Par`, `Pedigree`, `RunStats`, `WindowWriter`, `Main` (`main_pkg/main_driver.rs`,
+      `pub fn main(&[String])`) — the top-level driver wiring phase + imp + IO. CLI wired as three
+      binaries (`beagle-rs`, `bref3`, `unbref3`). End-to-end smoke test: target-only VCF → valid
+      phased `<out>.vcf.gz` + `.log`. Wall-clock `.log` fields are the documented normalization exception.
 - [x] `phase` (30) ✅ — phasing engine fully ported: PBWT/IBS (`Pbwt*Phaser`, `Ibs2*`,
       `Low*PhaseIbs`), HMM states (`Basic/LowFreqPhaseStates`), forward-backward HMM
       (`PhaseBaum2`, `HmmUpdater`, `HmmStateProbs`, `HmmParamData`), Li-Stephens driver
