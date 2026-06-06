@@ -1,12 +1,18 @@
-//! Port of `blbutil/Utilities.java` (the package-independent parts). The remaining
-//! IO-dependent helpers (`duoPrint*`) and runtime/time helpers (`timeStamp`,
-//! `printMemoryUse`, `commandLine`) are ported alongside `main`.
+//! Port of `blbutil/Utilities.java` (the package-independent parts) plus the IO/runtime
+//! helpers used by `main` (`duoPrint*`, `timeStamp`, `commandLine`).
+//!
+//! Parity note: `timeStamp()` reads the wall clock and is a documented `.log` normalization
+//! field (run date), like `vcf::VcfWriter`'s `filedate`. `commandLine()` echoes the invocation;
+//! the Rust binary has no JVM `-Xmx` heap setting, so that `-Xmx<N>m` token is omitted (another
+//! `.log` line that differs from the `java -jar` reference and is normalized in comparisons).
 
-use crate::blbutil::{InputIt, StringUtil};
+use crate::blbutil::{consts, InputIt, StringUtil};
 use crate::jdk::Random;
 use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
+use std::io::Write;
 use std::path::Path;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 /// Port of `blbutil/Utilities.java` (static methods).
 pub struct Utilities;
@@ -53,6 +59,62 @@ impl Utilities {
         sb.push_str(&seconds.to_string());
         sb.push_str(if seconds == 1 { " second" } else { " seconds" });
         sb
+    }
+
+    /// `commandLine(String program, String[] args)` — the multi-line command echo for the log.
+    /// The JVM `-Xmx<N>m` token has no Rust equivalent and is omitted (see the module note).
+    pub fn command_line(program: &str, args: &[String]) -> String {
+        let mut sb = String::with_capacity(args.len() * 20);
+        sb.push_str(consts::NL);
+        sb.push_str("Command line: java");
+        sb.push_str(" -jar ");
+        sb.push_str(program);
+        sb.push_str(consts::NL);
+        for arg in args {
+            sb.push_str("  ");
+            sb.push_str(arg);
+            sb.push_str(consts::NL);
+        }
+        sb
+    }
+
+    /// `timeStamp()` — current UTC time as `hh:mm a 'UTC on' dd MMM yyyy` (wall-clock; a
+    /// documented `.log` normalization field).
+    pub fn time_stamp() -> String {
+        let secs = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|d| d.as_secs())
+            .unwrap_or(0);
+        let days = (secs / 86400) as i64;
+        let sod = (secs % 86400) as i64; // seconds of day (UTC)
+        let hour24 = sod / 3600;
+        let minute = (sod % 3600) / 60;
+        let am_pm = if hour24 < 12 { "AM" } else { "PM" };
+        let mut hour12 = hour24 % 12;
+        if hour12 == 0 {
+            hour12 = 12;
+        }
+        let (y, m, d) = civil_from_days(days);
+        const MONTHS: [&str; 12] = [
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+        ];
+        format!(
+            "{hour12:02}:{minute:02} {am_pm} UTC on {d:02} {mon} {y:04}",
+            mon = MONTHS[(m - 1) as usize]
+        )
+    }
+
+    /// `duoPrint(PrintWriter out, CharSequence s)` — print `s` to stdout and to `out`.
+    pub fn duo_print(out: &mut dyn Write, s: &str) {
+        print!("{s}");
+        let _ = out.write_all(s.as_bytes());
+    }
+
+    /// `duoPrintln(PrintWriter out, CharSequence s)` — `println` `s` to stdout and to `out`.
+    pub fn duo_println(out: &mut dyn Write, s: &str) {
+        println!("{s}");
+        let _ = out.write_all(s.as_bytes());
+        let _ = out.write_all(b"\n");
     }
 
     /// `arrayToMap(E[] array)` — element → index map; panics on a duplicate element.
@@ -115,6 +177,20 @@ impl Utilities {
         eprintln!("Terminating program.");
         std::process::exit(1);
     }
+}
+
+/// Howard Hinnant's `civil_from_days`: days since 1970-01-01 → (year, month, day).
+fn civil_from_days(days: i64) -> (i64, i64, i64) {
+    let z = days + 719468;
+    let era = if z >= 0 { z } else { z - 146096 } / 146097;
+    let doe = z - era * 146097;
+    let yoe = (doe - doe / 1460 + doe / 36524 - doe / 146096) / 365;
+    let y = yoe + era * 400;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let d = doy - (153 * mp + 2) / 5 + 1;
+    let m = if mp < 10 { mp + 3 } else { mp - 9 };
+    (if m <= 2 { y + 1 } else { y }, m, d)
 }
 
 #[cfg(test)]
