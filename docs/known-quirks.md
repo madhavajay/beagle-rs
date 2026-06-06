@@ -47,3 +47,4 @@ These are not Beagle bugs but places where Rust↔Java floating-point results co
 | ID | Location | Risk | Mitigation |
 |----|----------|------|------------|
 | num-1 | `MarkerMap.pRecomb` (`-Math.expm1(c*genDist)`) | Java `Math.expm1` vs Rust `f64::exp_m1` are independent libm implementations of `e^x - 1`; results may differ by ~1 ULP, which can cascade through the HMM. | Verify against Java in the parity harness; if it diverges, vendor an fdlibm `expm1` to match `StrictMath`. |
+| num-2 | `Par.liStephensPMismatch` (`1/(Math.log(nHaps)+0.5)`) | Java `Math.log` vs Rust `f64::ln` may differ by ~1 ULP, affecting the default `err`. | Verify against Java; vendor fdlibm `log` if needed. |

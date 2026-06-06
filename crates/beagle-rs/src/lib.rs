@@ -21,4 +21,5 @@ pub mod bref;
 pub mod ints;
 pub mod jdk;
 pub mod jdk_io;
+pub mod main_pkg;
 pub mod vcf;
