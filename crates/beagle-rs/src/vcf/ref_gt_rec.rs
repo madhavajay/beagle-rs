@@ -46,6 +46,13 @@ pub trait RefGTRec: GTRec {
 
     /// `map(int index)`.
     fn map(&self, index: i32) -> Box<dyn IntArray>;
+
+    /// Identity key for a sequence-coded record's `hapToSeq` map (the `Rc`'s address), used by
+    /// the bref3 writer to group records sharing one map into a block. `None` for allele-coded
+    /// records (Java compares the `IntArray` object reference from `map(0)`).
+    fn seq_block_key(&self) -> Option<usize> {
+        None
+    }
 }
 
 /// `RefGTRec.alleleRefGTRec(Marker, Samples, int[][])` — biallelic → `TwoAlleleRefGTRec`,

@@ -191,15 +191,17 @@ impl SeqCoder3 {
         }
         let mut list: Vec<Box<dyn RefGTRec>> = Vec::with_capacity(self.recs.len());
         let seq2_hap = self.seq2_first_hap();
-        let hap2seq = packed_create(&self.hap2_seq, seq2_hap.len() as i32);
+        // One shared `hap_to_seq` map for the whole group, so the records compare equal by
+        // identity for bref3 block grouping (Java reuses one `IntArray` object per group).
+        let hap2seq = std::rc::Rc::new(self.hap2_seq.clone());
         let recs = std::mem::take(&mut self.recs);
         for rec in &recs {
             let m = rec.marker().clone();
             let seq2allele = seq2_allele(rec.as_ref(), &seq2_hap);
-            list.push(Box::new(HapRefGTRec::new(
+            list.push(Box::new(HapRefGTRec::new_shared(
                 m,
                 self.samples.clone(),
-                hap2seq.as_ref(),
+                hap2seq.clone(),
                 seq2allele.as_ref(),
             )));
         }

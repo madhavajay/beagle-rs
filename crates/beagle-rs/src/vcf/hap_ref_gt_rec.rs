@@ -5,16 +5,22 @@
 //! As with `IntArrayRefGTRec`, the two maps are stored unpacked and the packed `IntArray`s
 //! are reconstructed on demand for `maps()`/`map()` (value-identical to Java).
 
+use std::rc::Rc;
+
 use crate::ints::{packed_create, IndexArray, IntArray};
 
 use super::ref_gt_rec::non_null_cnt;
 use super::{to_vcf_rec, GTRec, Marker, RefGTRec, Samples};
 
 /// Port of `vcf/HapRefGTRec.java`.
+///
+/// `hap_to_seq` is held in an `Rc` so that all records produced by a single
+/// `SeqCoder3::get_compressed_list` group share one map by identity — the bref3 writer groups
+/// records into a block by comparing this identity (Java compares the `IntArray` object).
 pub struct HapRefGTRec {
     marker: Marker,
     samples: Samples,
-    hap_to_seq: Vec<i32>,
+    hap_to_seq: Rc<Vec<i32>>,
     seq_to_allele: Vec<i32>,
     n_alleles: i32,
 }
@@ -37,16 +43,30 @@ impl HapRefGTRec {
         hap_to_seq: &dyn IntArray,
         seq_to_allele: &dyn IntArray,
     ) -> Self {
-        assert!(hap_to_seq.size() == 2 * samples.size(), "inconsistent data");
-        let n_alleles = marker.n_alleles();
         let hts: Vec<i32> = (0..hap_to_seq.size()).map(|i| hap_to_seq.get(i)).collect();
+        Self::new_shared(marker, samples, Rc::new(hts), seq_to_allele)
+    }
+
+    /// Like [`HapRefGTRec::new`] but shares an existing `hap_to_seq` map (`Rc`) so that records
+    /// in the same compressed group compare equal by identity for bref3 block grouping.
+    pub fn new_shared(
+        marker: Marker,
+        samples: Samples,
+        hap_to_seq: Rc<Vec<i32>>,
+        seq_to_allele: &dyn IntArray,
+    ) -> Self {
+        assert!(
+            hap_to_seq.len() as i32 == 2 * samples.size(),
+            "inconsistent data"
+        );
+        let n_alleles = marker.n_alleles();
         let sta: Vec<i32> = (0..seq_to_allele.size())
             .map(|i| seq_to_allele.get(i))
             .collect();
         HapRefGTRec {
             marker,
             samples,
-            hap_to_seq: hts,
+            hap_to_seq,
             seq_to_allele: sta,
             n_alleles,
         }
@@ -181,6 +201,10 @@ impl RefGTRec for HapRefGTRec {
             1 => self.map1(),
             _ => panic!("{}", index),
         }
+    }
+
+    fn seq_block_key(&self) -> Option<usize> {
+        Some(Rc::as_ptr(&self.hap_to_seq) as usize)
     }
 }
 

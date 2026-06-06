@@ -4,16 +4,22 @@
 use crate::jdk_io::DataIn;
 use std::io::{self, Read};
 
+mod as_is_bref3_writer;
 mod bref3_header;
 mod bref3_it;
 mod bref3_reader;
 mod bref_block;
+mod bref_writer;
+mod compress_bref3_writer;
 mod seq_coder3;
 
+pub use as_is_bref3_writer::AsIsBref3Writer;
 pub use bref3_header::Bref3Header;
 pub use bref3_it::Bref3It;
 pub use bref3_reader::Bref3Reader;
 pub use bref_block::BrefBlock;
+pub use bref_writer::BrefWriter;
+pub use compress_bref3_writer::CompressBref3Writer;
 pub use seq_coder3::{default_max_n_seq, SeqCoder3, COMPRESS_FREQ_THRESHOLD, MAX_NALLELES};
 
 /// `AsIsBref3Writer.END_OF_DATA`.
