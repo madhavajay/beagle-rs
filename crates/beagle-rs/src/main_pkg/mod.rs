@@ -4,10 +4,12 @@
 mod par;
 mod pedigree;
 mod run_stats;
+mod window_writer;
 
 pub use par::{li_stephens_p_mismatch, Par};
 pub use pedigree::Pedigree;
 pub use run_stats::RunStats;
+pub use window_writer::WindowWriter;
 
 /// `Main.VERSION`.
 pub const VERSION: &str = "(version 5.5)";
